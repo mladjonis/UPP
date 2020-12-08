@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PublishingCompany.Camunda.BPMN;
+using PublishingCompany.Camunda.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace PublishingCompany.Camunda
             services.AddControllers();
             services.AddMediatR(typeof(Startup));
             services.AddCamunda(Configuration.GetSection("CamundaApi").Value);
+            services.AddRepository();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

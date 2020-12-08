@@ -74,16 +74,15 @@ namespace PublishingCompany.Camunda.BPMN
             }
         }
 
-        public async Task<string> StartProcessFor(User user)
+        public async Task<string> StartWriterRegistrationProcess()
         {
-            var processParams = new StartProcessInstance()
-                .SetVariable("userId", VariableValue.FromObject(user.Id.ToString()));
+            var processInstance = new StartProcessInstance();
 
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();
 
             var processStartResult = await
-                camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processParams);
+                camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processInstance);
 
             return processStartResult.Id;
         }
