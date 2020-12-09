@@ -8,8 +8,8 @@ namespace PublishingCompany.Camunda.Repositories
 {
     public interface IUnitOfWork : IDisposable
     {
-        IUserRepository Users { get; }
-        IGenreRepository Genres { get; }
+        IUserRepository Users { get; set; }
+        IGenreRepository Genres { get; set; }
         int Complete();
         Task<int> CompleteAsync();
     }

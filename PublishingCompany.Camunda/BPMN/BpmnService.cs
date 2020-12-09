@@ -21,19 +21,6 @@ namespace PublishingCompany.Camunda.BPMN
             this.camunda = CamundaClient.Create(camundaRestApiUri);
         }
 
-        public async Task GetAllExternalTasks()
-        {
-            var list = await camunda.ExternalTasks.Query().List();
-            return;
-        }
-
-        public async Task GetAllProcesses()
-        {
-            var list = await camunda.ProcessDefinitions.Query().List();
-            return;
-            //return Task.Run(() => camunda.ProcessDefinitions.Query().List()).Result;
-        }
-
         public async Task DeployProcessDefinition()
         {
             var bpmnResourceStream = this.GetType()
@@ -76,7 +63,7 @@ namespace PublishingCompany.Camunda.BPMN
 
         public async Task<string> StartWriterRegistrationProcess()
         {
-            var processInstance = new StartProcessInstance();
+            var processInstance = new StartProcessInstance() { };
 
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();

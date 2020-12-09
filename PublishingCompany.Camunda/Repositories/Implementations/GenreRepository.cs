@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Repositories.Implementations
 {
-    public class GenreRepository : Repository<Genre>,IGenreRepository
+    public class GenreRepository : Repository<Genre, Guid>,IGenreRepository
     {
         public GenreRepository(CamundaContext context):base(context)
         {

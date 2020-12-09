@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PublishingCompany.Camunda.BPMN;
 using PublishingCompany.Camunda.Repositories;
+using PublishingCompany.Camunda.Validators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,8 @@ namespace PublishingCompany.Camunda
             services.AddMediatR(typeof(Startup));
             services.AddCamunda(Configuration.GetSection("CamundaApi").Value);
             services.AddRepository();
+            services.AddValidators();
+            //add validators di
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -18,6 +18,8 @@
   <ItemGroup>
     <Folder Include="BPMN\Domain\" />
     <Folder Include="CQRS\AddGenres\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="DTO\" />
   </ItemGroup>
 
 

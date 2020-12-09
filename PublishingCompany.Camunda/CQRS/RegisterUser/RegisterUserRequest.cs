@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.CQRS.RegisterUser
 {
-    public class RegisterUserRequest : IRequest<Unit>
+    public class RegisterUserRequest : IRequest<RegisterUserResponse>
     {
         public string Name { get; set; }
         public string Lastname { get; set; }

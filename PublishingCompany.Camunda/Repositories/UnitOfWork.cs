@@ -11,9 +11,9 @@ namespace PublishingCompany.Camunda.Repositories
     {
         private readonly CamundaContext _context;
 
-        public IUserRepository Users { get; }
+        public IUserRepository Users { get; set; }
 
-        public IGenreRepository Genres { get; }
+        public IGenreRepository Genres { get; set; }
 
         public UnitOfWork(CamundaContext context, IUserRepository userRepository, IGenreRepository genreRepository)
         {
