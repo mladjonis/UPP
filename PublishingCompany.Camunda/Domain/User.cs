@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PublishingCompany.Camunda.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,7 +20,8 @@ namespace PublishingCompany.Camunda.Domain
         public string City { get; set; }
         public string State { get; set; }
         public string Username { get; set; }
-        public string Password { get; set; }
+        public string PasswordHash { get; set; }
+        public UserRegistrationStatus UserRegistrationStatus { get; set; }
         public List<Genre> Genres{ get; set; }
     }
 }

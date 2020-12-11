@@ -5,6 +5,7 @@ using Camunda.Api.Client.ProcessDefinition;
 using Camunda.Api.Client.ProcessInstance;
 using Camunda.Api.Client.UserTask;
 using PublishingCompany.Camunda.Domain;
+using PublishingCompany.Camunda.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,12 @@ namespace PublishingCompany.Camunda.BPMN
     public class BpmnService
     {
         private readonly CamundaClient camunda;
+        private readonly IUnitOfWork _unitOfWork;
 
         public BpmnService(string camundaRestApiUri)
         {
             this.camunda = CamundaClient.Create(camundaRestApiUri);
+            //this._unitOfWork = unitOfWork;
         }
 
         public async Task DeployProcessDefinition()
@@ -43,6 +46,25 @@ namespace PublishingCompany.Camunda.BPMN
             }
         }
 
+        public async Task<List<ProcessInstanceInfo>> GetProcessInstance(string processInstanceId)
+        {
+            return await camunda.ProcessInstances.Query(new ProcessInstanceQuery() { ProcessDefinitionId = processInstanceId }).List();
+        }
+
+        public async Task<UserTaskInfo> GetFirstTask(string processInstanceId)
+        {
+            var tasks = await camunda.UserTasks.Query(new TaskQuery() { ProcessInstanceId = processInstanceId }).List();
+            return tasks.FirstOrDefault();
+        }
+
+        public async Task<Dictionary<string,VariableValue>> GetTaskFormData(string taskId)
+        {
+            var formData = await camunda.UserTasks[taskId].GetFormVariables();
+            return formData;
+        }
+
+        public 
+
         public async Task CleanupProcessInstances()
         {
             var instances = await camunda.ProcessInstances
@@ -63,14 +85,24 @@ namespace PublishingCompany.Camunda.BPMN
 
         public async Task<string> StartWriterRegistrationProcess()
         {
-            var processInstance = new StartProcessInstance() { };
+            var processInstance = new StartProcessInstance().SetVariable("validation", false);
+            //proba
+            //var form = new FormInfo().Key;
+            //var startForm = new SubmitStartForm().SetVariable("username", "asa");
+            //var asa = await camunda.UserTasks.Query(new TaskQuery()).List();
+
 
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();
 
-            var processStartResult = await
-                camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processInstance);
 
+            //namestiti kada se zavrse modeli da vrati clanove komisije koji ce ici u model
+            //var comitee = _unitOfWork.Users.GetAll().ToList();
+            //stara podesavanja vratiti kada se istestira 
+            //var processStartResult = await
+            //    camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processInstance);
+            var processStartResult = await
+                camunda.ProcessDefinitions.ByKey("Process_Probe_11").StartProcessInstance(processInstance);
             return processStartResult.Id;
         }
 

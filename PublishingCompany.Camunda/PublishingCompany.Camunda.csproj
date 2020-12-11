@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="Camunda.Api.Client" Version="2.5.2" />
     <PackageReference Include="Camunda.Worker" Version="0.10.2" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
@@ -18,8 +19,6 @@
   <ItemGroup>
     <Folder Include="BPMN\Domain\" />
     <Folder Include="CQRS\AddGenres\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="DTO\" />
   </ItemGroup>
 
 

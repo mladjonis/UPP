@@ -7,5 +7,6 @@ namespace PublishingCompany.Camunda.CQRS.RegisterUser
 {
     public class RegisterUserResponse
     {
+        public string Error { get; set; }
     }
 }

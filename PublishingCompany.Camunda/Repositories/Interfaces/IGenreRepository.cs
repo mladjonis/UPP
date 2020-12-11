@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Repositories.Interfaces
 {
-    public interface IGenreRepository : IRepository<Genre>
+    public interface IGenreRepository : IRepository<Genre,Guid>
     {
     }
 }

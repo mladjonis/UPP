@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,11 +31,11 @@ namespace PublishingCompany.Camunda
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddAutoMapper(typeof(Startup));
             services.AddMediatR(typeof(Startup));
             services.AddCamunda(Configuration.GetSection("CamundaApi").Value);
             services.AddRepository();
             services.AddValidators();
-            //add validators di
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

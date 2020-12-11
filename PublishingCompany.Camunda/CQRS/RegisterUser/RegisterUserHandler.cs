@@ -1,5 +1,8 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using PublishingCompany.Camunda.BPMN;
+using PublishingCompany.Camunda.Domain;
+using PublishingCompany.Camunda.Repositories;
 using PublishingCompany.Camunda.Repositories.Interfaces;
 using PublishingCompany.Camunda.Validators.User;
 using System;
@@ -12,22 +15,31 @@ namespace PublishingCompany.Camunda.CQRS.RegisterUser
 {
     public class RegisterUserHandler : IRequestHandler<RegisterUserRequest, RegisterUserResponse>
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IUserValidator _userValidator;
+        private readonly IMapper _mapper;
         private readonly BpmnService _bpmnService;
 
-        public RegisterUserHandler(IUserRepository userRepository, IUserValidator userValidator, BpmnService bpmnService)
+
+        public RegisterUserHandler(IMapper mapper, IUnitOfWork unitOfWork, IUserValidator userValidator, BpmnService bpmnService)
         {
-            this._userRepository = userRepository;
+            this._mapper = mapper;
+            this._unitOfWork = unitOfWork;
             this._userValidator = userValidator;
             this._bpmnService = bpmnService;
         }
 
-        public Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
+        public async Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
         {
-            var checkUserExistance = _userValidator.UserExists(request.Email);
-            RegisterUserResponse registerUserResponse = new RegisterUserResponse();
-            return Task.FromResult(registerUserResponse);
+            var registerUserResponse = new RegisterUserResponse();
+            var processId = await _bpmnService.StartWriterRegistrationProcess();
+
+            var task = await _bpmnService.GetFirstTask(processId);
+            var formData = await _bpmnService.GetTaskFormData(task.Id);
+
+            //_unitOfWork.Users.Add(_mapper.Map<User>(request));
+
+            return registerUserResponse;
         }
     }
 }

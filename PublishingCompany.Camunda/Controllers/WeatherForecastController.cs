@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PublishingCompany.Camunda.BPMN;
+using PublishingCompany.Camunda.CQRS.RegisterUser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace PublishingCompany.Camunda.Controllers
             bpmnServiceTasks = bpmnService;
         }
 
-        [HttpGet]
+        [HttpGet("asa")]
         public async Task<ActionResult> GetAsync()
         {
             //var rng = new Random();
@@ -42,7 +43,7 @@ namespace PublishingCompany.Camunda.Controllers
             //.ToArray();
             /*await bpmnServiceTasks.GetAllProcesses()*/
             //await bpmnServiceTasks.GetAllExternalTasks();
-            await bpmnServiceTasks.GetAllProcesses();
+            var response = await _mediator.Send(new RegisterUserRequest() { Name = "asa" });
             return Ok();
         }
     }
