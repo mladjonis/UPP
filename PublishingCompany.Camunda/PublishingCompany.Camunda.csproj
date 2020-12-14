@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BPMN\Domain\" />
     <Folder Include="CQRS\AddGenres\" />
   </ItemGroup>
 

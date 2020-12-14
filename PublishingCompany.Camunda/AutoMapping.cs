@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using PublishingCompany.Camunda.CQRS.GetDormData;
 using PublishingCompany.Camunda.CQRS.RegisterUser;
 using PublishingCompany.Camunda.Domain;
+using PublishingCompany.Camunda.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +14,8 @@ namespace PublishingCompany.Camunda
     {
         public AutoMapping()
         {
-            //add
-            //CreateMap<User, RegisterUserRequest>();
+            //add mapings
+            CreateMap<FormFieldsDto, GetFormDataResponse>();
         }
     }
 }

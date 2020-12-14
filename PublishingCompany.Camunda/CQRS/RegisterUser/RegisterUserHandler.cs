@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Camunda.Api.Client.UserTask;
 using MediatR;
 using PublishingCompany.Camunda.BPMN;
 using PublishingCompany.Camunda.Domain;
+using PublishingCompany.Camunda.DTO;
 using PublishingCompany.Camunda.Repositories;
 using PublishingCompany.Camunda.Repositories.Interfaces;
 using PublishingCompany.Camunda.Validators.User;
@@ -31,11 +33,14 @@ namespace PublishingCompany.Camunda.CQRS.RegisterUser
 
         public async Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
         {
-            var registerUserResponse = new RegisterUserResponse();
             var processId = await _bpmnService.StartWriterRegistrationProcess();
 
             var task = await _bpmnService.GetFirstTask(processId);
-            var formData = await _bpmnService.GetTaskFormData(task.Id);
+            var formData = await _bpmnService.GetFormData(processId, task.Id);
+            var registerUserResponse = _mapper.Map<RegisterUserResponse>(formData);
+            //var ss = await _bpmnService.ClaimTask(task.Id, "demo");
+            //var aa = _bpmnService.GetRealUserTask(task.Id);
+            //await aa.SubmitForm(new CompleteTask());
 
             //_unitOfWork.Users.Add(_mapper.Map<User>(request));
 

@@ -1,23 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import Home from "./components/Home/Home";
 
 function App() {
+  const forma = {
+    processInstanceId:
+      "Process_Probe_12:2:c1caa886-3cc5-11eb-92f4-e4f89c5bfdff",
+    processDefinitionKey: "Process_Probe_12",
+    taskId: "registration_task",
+    taskName: "Registration",
+    formKey: "form_key",
+    camundaFormFields: [
+      {
+        formId: "username",
+        label: "Username",
+        type: "string",
+        validators: [
+          {
+            validatorName: "required",
+            validatorConfig: "none",
+          },
+          {
+            validatorName: "minlength",
+            validatorConfig: "6",
+          },
+        ],
+      },
+    ],
+  };
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Home />
     </div>
   );
 }

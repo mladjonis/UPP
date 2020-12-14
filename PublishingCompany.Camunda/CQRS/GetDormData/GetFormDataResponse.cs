@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PublishingCompany.Camunda.CQRS.RegisterUser
+namespace PublishingCompany.Camunda.CQRS.GetDormData
 {
-    public class RegisterUserResponse
+    public class GetFormDataResponse
     {
         public string ProcessInstanceId { get; set; }
         public string ProcessDefinitionKey { get; set; }

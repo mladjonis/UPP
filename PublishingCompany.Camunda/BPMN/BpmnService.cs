@@ -4,11 +4,14 @@ using Camunda.Api.Client.ExternalTask;
 using Camunda.Api.Client.ProcessDefinition;
 using Camunda.Api.Client.ProcessInstance;
 using Camunda.Api.Client.UserTask;
+using PublishingCompany.Camunda.BPMN.Domain;
 using PublishingCompany.Camunda.Domain;
+using PublishingCompany.Camunda.DTO;
 using PublishingCompany.Camunda.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.BPMN
@@ -16,12 +19,132 @@ namespace PublishingCompany.Camunda.BPMN
     public class BpmnService
     {
         private readonly CamundaClient camunda;
-        private readonly IUnitOfWork _unitOfWork;
+        private string processDefinitionId = string.Empty;
 
         public BpmnService(string camundaRestApiUri)
         {
             this.camunda = CamundaClient.Create(camundaRestApiUri);
-            //this._unitOfWork = unitOfWork;
+        }
+
+        #region Regex and XML configuration
+        private static readonly string beginningRegexString = @"<bpmn:userTask.+>$";
+        private static readonly string endingRegexString = @"</bpmn:userTask>";
+        /// <summary>
+        /// format za atribute je sledeci \sIMEATRIBUTA=VREDNOST_POD_NAVODNICIMA
+        /// sa regexom se izvlace imena atributa i vrednosti
+        /// </summary>
+        private static readonly string xmlAttributesRegexString = "\\s[a-zA-Z0-9_:]+=(\"[\\w\\s] +\")";
+        private Regex beginningRegex = new Regex(@"<bpmn:userTask.+>$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
+        private Regex endingRegex = new Regex(@"</bpmn:userTask>", RegexOptions.Compiled);
+        private Regex xmlAttributesRegex = new Regex("\\s[a-zA-Z0-9_:]+=(\"[\\w\\s]+\")", RegexOptions.Compiled);
+        private List<string> taskListFromXML = new List<string>();
+        #endregion
+
+        #region Populate regexIndexes and taskListFromXML methods
+        private List<int> PopulateRegexIndexesWithStartingIndexes(string xmlString)
+        {
+            List<int> regexIndexes = new List<int>();
+            MatchCollection matchesBegining = beginningRegex.Matches(xmlString);
+            foreach (Match match in matchesBegining)
+            {
+                regexIndexes.Add(match.Index);
+            }
+            return regexIndexes;
+        }
+        private List<int> PopulateRegexIndexesWithEndingIndexes(string xmlString)
+        {
+            List<int> regexIndexes = new List<int>();
+            MatchCollection matchesEnding = endingRegex.Matches(xmlString);
+            foreach (Match match in matchesEnding)
+            {
+                regexIndexes.Add(match.Index);
+            }
+            return regexIndexes;
+        }
+        /// <summary>
+        /// Broj prolaza kroz listu se deli sa 2 jer ce lista uvek da sadrzi paran broj clanova tj
+        /// svaki userTask ima svoj pocetni i zavrsni tag.
+        /// parametri regexIndexes[i] i regexIndexes[i+2] -regexIndexes[i] predstavjaju indeks pocetka i zavrsetka
+        /// userTaska u xmlString formatu modela
+        /// </summary>
+        /// <param name="xmlString"></param>
+        private void PopulateTaskListFromXML(string xmlString)
+        {
+            var regexIndexes = PopulateRegexIndexesWithStartingIndexes(xmlString);
+            regexIndexes.AddRange(PopulateRegexIndexesWithEndingIndexes(xmlString));
+            taskListFromXML.Clear();
+            for (int i = 0; i < regexIndexes.Count / 2; i++)
+            {
+                taskListFromXML.Add(xmlString.Substring(regexIndexes[i], regexIndexes[i + 2] - regexIndexes[i]));
+            }
+        }
+        #endregion
+
+        public async Task<FormFieldsDto> GetFormData(string processDefinitionKey, string taskKeyDefinitionOrTaskName)
+        {
+            var processDefinition = await GetProcessDefinitionDiagramAsync(processDefinitionKey);
+            PopulateTaskListFromXML(processDefinition.Bpmn20Xml);
+            FormFieldsDto formFields = new FormFieldsDto() { ProcessDefinitionKey= processDefinitionKey, ProcessInstanceId=processDefinition.Id };
+            foreach (var task in taskListFromXML)
+            {
+                if (task.Contains($"id=\"{taskKeyDefinitionOrTaskName}\"") || task.Contains($"name=\"{taskKeyDefinitionOrTaskName}\""))
+                {
+                    var r = xmlAttributesRegex.Matches(task);
+                    var camundaFormField = new CamundaFormField();
+                    for (int i = 0; i < r.Count; i++)
+                    {
+                        if (r[i].Value.Contains("config="))
+                            continue;
+                        if (r[i].Value.Contains("required") || r[i].Value.Contains("readonly"))
+                        {
+                            FormFieldValidator formFieldsValidators = new FormFieldValidator() { ValidatorName = r[i].Groups[1].Value.Replace("\"", ""), ValidatorConfig = "none" };
+                            camundaFormField.Validators.Add(formFieldsValidators);
+                            //formFieldValidatorsList.Add(formFieldsValidators);
+                            continue;
+                        }
+                        else if (r[i].Value.Contains("minlength") || r[i].Value.Contains("maxlength") || r[i].Value.Contains("min") || r[i].Value.Contains("max"))
+                        {
+                            FormFieldValidator formFieldsValidators = new FormFieldValidator() { ValidatorName = r[i].Groups[1].Value.Replace("\"", ""), ValidatorConfig = r[i + 1].Groups[1].Value.Replace("\"", "") };
+                            camundaFormField.Validators.Add(formFieldsValidators);
+                            //formFieldValidatorsList.Add(formFieldsValidators);
+                            continue;
+                        }
+                        if (r[i].Value.Contains("id=") && i < 3)
+                        {
+                            formFields.TaskId = r[i].Groups[1].Value.Replace("\"", "");
+                            continue;
+                        }
+                        else if (r[i].Value.Contains("name="))
+                        {
+                            formFields.TaskName = r[i].Groups[1].Value.Replace("\"", "");
+                            continue;
+                        }
+                        else if (r[i].Value.Contains("formKey="))
+                        {
+                            formFields.FormKey = r[i].Groups[1].Value.Replace("\"", "");
+                            continue;
+                        }
+                        else if (r[i].Value.Contains("id=") && i >= 3)
+                        {
+                            camundaFormField.FormId = r[i].Groups[1].Value.Replace("\"", "");
+                            continue;
+                        }
+                        else if (r[i].Value.Contains("type="))
+                        {
+                            camundaFormField.Type = r[i].Groups[1].Value.Replace("\"", "");
+                            continue;
+                        }
+                        else if (r[i].Value.Contains("label="))
+                        {
+                            camundaFormField.Label = r[i].Groups[1].Value.Replace("\"", "");
+                            continue;
+                        }
+                    }
+                    //camundaFormField.Validators = formFieldValidatorsList;
+                    formFields.CamundaFormFields.Add(camundaFormField);
+                }
+            }
+            return formFields;
         }
 
         public async Task DeployProcessDefinition()
@@ -51,19 +174,47 @@ namespace PublishingCompany.Camunda.BPMN
             return await camunda.ProcessInstances.Query(new ProcessInstanceQuery() { ProcessDefinitionId = processInstanceId }).List();
         }
 
+        public async Task<ProcessDefinitionInfo> GetProcessDefinitionKey()
+        {
+            var processes=  await camunda.ProcessDefinitions.Query(new ProcessDefinitionQuery() { Key = this.processDefinitionId }).List();
+            return processes.FirstOrDefault();
+        }
+
         public async Task<UserTaskInfo> GetFirstTask(string processInstanceId)
         {
             var tasks = await camunda.UserTasks.Query(new TaskQuery() { ProcessInstanceId = processInstanceId }).List();
             return tasks.FirstOrDefault();
         }
 
+        public TaskResource GetRealUserTask(string taskId)
+        {
+            var task = camunda.UserTasks[taskId];
+            return task;
+        }
+
+        /// <summary>
+        /// vraca samo tip inputa i ime
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
         public async Task<Dictionary<string,VariableValue>> GetTaskFormData(string taskId)
         {
+            //ili namestiti u metodi koje hocemo variable jer iz nekog razloga uzima i procesne varijable
+            //ili nakon izvlacenja isfiltrirati
             var formData = await camunda.UserTasks[taskId].GetFormVariables();
             return formData;
         }
 
-        public 
+        public async Task<ProcessDefinitionDiagram> GetProcessDefinitionDiagramAsync(string processDefinitionKey)
+        {
+            return await camunda.ProcessDefinitions.ByKey(processDefinitionKey).GetXml();
+        }
+
+        public async Task<string> GetProcessDefinitionXMLASync(string processDefinitionKey)
+        {
+            var processDefinitionDiagram = await camunda.ProcessDefinitions.ByKey(processDefinitionKey).GetXml();
+            return processDefinitionDiagram.Bpmn20Xml;
+        }
 
         public async Task CleanupProcessInstances()
         {
@@ -83,6 +234,10 @@ namespace PublishingCompany.Camunda.BPMN
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns> Process definition Id</returns>
         public async Task<string> StartWriterRegistrationProcess()
         {
             var processInstance = new StartProcessInstance().SetVariable("validation", false);
@@ -101,8 +256,9 @@ namespace PublishingCompany.Camunda.BPMN
             //stara podesavanja vratiti kada se istestira 
             //var processStartResult = await
             //    camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processInstance);
+            processDefinitionId = "Process_Probe_12";
             var processStartResult = await
-                camunda.ProcessDefinitions.ByKey("Process_Probe_11").StartProcessInstance(processInstance);
+                camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;
         }
 
@@ -113,12 +269,13 @@ namespace PublishingCompany.Camunda.BPMN
             return task;
         }
 
-        public async Task<UserTaskInfo> CompleteTask(string taskId, User userFromFront)
+        public async Task<UserTaskInfo> CompleteTask(string taskId)
         {
             var task = await camunda.UserTasks[taskId].Get();
-            var completeTask = new CompleteTask(); //dovrsiti
+            var completeTask = new CompleteTask(); //dovrsiti ako treba
             await camunda.UserTasks[taskId].Complete(completeTask);
             return task;
         }
+         
     }
 }

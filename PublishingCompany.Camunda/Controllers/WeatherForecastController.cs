@@ -31,20 +31,11 @@ namespace PublishingCompany.Camunda.Controllers
         }
 
         [HttpGet("asa")]
-        public async Task<ActionResult> GetAsync()
+        public async Task<ActionResult> Get()
         {
-            //var rng = new Random();
-            //return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            //{
-            //    Date = DateTime.Now.AddDays(index),
-            //    TemperatureC = rng.Next(-20, 55),
-            //    Summary = Summaries[rng.Next(Summaries.Length)]
-            //})
-            //.ToArray();
-            /*await bpmnServiceTasks.GetAllProcesses()*/
-            //await bpmnServiceTasks.GetAllExternalTasks();
-            var response = await _mediator.Send(new RegisterUserRequest() { Name = "asa" });
-            return Ok();
+            var asa = await bpmnServiceTasks.GetFormData("Process_Probe_12", "registration_task");
+            //var response = await _mediator.Send(new RegisterUserRequest());
+            return Ok(asa);
         }
     }
 }
