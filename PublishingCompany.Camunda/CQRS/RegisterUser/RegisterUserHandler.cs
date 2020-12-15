@@ -4,6 +4,7 @@ using MediatR;
 using PublishingCompany.Camunda.BPMN;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.DTO;
+using PublishingCompany.Camunda.Helpers.FormSubmitMapper;
 using PublishingCompany.Camunda.Repositories;
 using PublishingCompany.Camunda.Repositories.Interfaces;
 using PublishingCompany.Camunda.Validators.User;
@@ -20,31 +21,37 @@ namespace PublishingCompany.Camunda.CQRS.RegisterUser
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserValidator _userValidator;
         private readonly IMapper _mapper;
+        private readonly IFormSubmitDtoMapper _formMapper;
         private readonly BpmnService _bpmnService;
 
-
-        public RegisterUserHandler(IMapper mapper, IUnitOfWork unitOfWork, IUserValidator userValidator, BpmnService bpmnService)
+        public RegisterUserHandler(IFormSubmitDtoMapper formMapper, IMapper mapper, IUnitOfWork unitOfWork, IUserValidator userValidator, BpmnService bpmnService)
         {
             this._mapper = mapper;
             this._unitOfWork = unitOfWork;
             this._userValidator = userValidator;
             this._bpmnService = bpmnService;
+            this._formMapper = formMapper;
         }
 
         public async Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
         {
-            var processId = await _bpmnService.StartWriterRegistrationProcess();
+            var mappedValues = _formMapper.MapDtoToDictionary(request.SubmitFields);
 
-            var task = await _bpmnService.GetFirstTask(processId);
-            var formData = await _bpmnService.GetFormData(processId, task.Id);
-            var registerUserResponse = _mapper.Map<RegisterUserResponse>(formData);
-            //var ss = await _bpmnService.ClaimTask(task.Id, "demo");
-            //var aa = _bpmnService.GetRealUserTask(task.Id);
-            //await aa.SubmitForm(new CompleteTask());
+            var task = await _bpmnService.GetTaskById(request.TaskId, request.ProcessInstanceId);
+            var procInstanceId = task.ProcessDefinitionId;
+            //await _bpmnService.SetProcessVariableByProcessInstanceId(procInstanceId, mappedValues);
+            var taskResource = await _bpmnService.GetUserTaskResource(request.TaskId);
 
-            //_unitOfWork.Users.Add(_mapper.Map<User>(request));
+            try
+            {
+                //morace ovako da se postavljaju varijable iz mapiranih vrednosti da se ponovo deserijalizuju...
+                await taskResource.SubmitForm(new CompleteTask().SetVariable("username","dsfsdfsdfsdf"));
+            }catch(Exception e)
+            {
+                //logger
+            }
 
-            return registerUserResponse;
+            return new RegisterUserResponse();
         }
     }
 }

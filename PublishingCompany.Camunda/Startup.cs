@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PublishingCompany.Camunda.BPMN;
+using PublishingCompany.Camunda.Helpers;
 using PublishingCompany.Camunda.Repositories;
 using PublishingCompany.Camunda.Validators;
 using System;
@@ -41,12 +42,16 @@ namespace PublishingCompany.Camunda
                         .AllowAnyHeader();
                     });
             });
-            services.AddControllers();
+            //dodaj newtonsoftJson deserializer jer me mrzilo da pravim poseban deserialajzer za konvertovanje
+            //liste koja sadrzi FormSubmitDto koja mora da sadrzi objekat da bi bilo citljivije, i onda treba napisati svoj jer system.text.json
+            //ne deserijalizuje ovo jos
+            services.AddControllers().AddNewtonsoftJson();
             services.AddAutoMapper(typeof(Startup));
             services.AddMediatR(typeof(Startup));
             services.AddCamunda(Configuration.GetSection("CamundaApi").Value);
             services.AddRepository();
             services.AddValidators();
+            services.AddHelpers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

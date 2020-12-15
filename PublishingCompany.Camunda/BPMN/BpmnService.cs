@@ -4,6 +4,7 @@ using Camunda.Api.Client.ExternalTask;
 using Camunda.Api.Client.ProcessDefinition;
 using Camunda.Api.Client.ProcessInstance;
 using Camunda.Api.Client.UserTask;
+using Camunda.Api.Client.VariableInstance;
 using PublishingCompany.Camunda.BPMN.Domain;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.DTO;
@@ -20,6 +21,7 @@ namespace PublishingCompany.Camunda.BPMN
     {
         private readonly CamundaClient camunda;
         private string processDefinitionId = string.Empty;
+        private string processInstanceId = string.Empty;
 
         public BpmnService(string camundaRestApiUri)
         {
@@ -80,11 +82,13 @@ namespace PublishingCompany.Camunda.BPMN
         }
         #endregion
 
+        //ovu metodu bi trebalo izmestiti u posebnu klasu u principu...ali za sada posto koristi ovaj servis neka je ovde
         public async Task<FormFieldsDto> GetFormData(string processDefinitionKey, string taskKeyDefinitionOrTaskName)
         {
             var processDefinition = await GetProcessDefinitionDiagramAsync(processDefinitionKey);
             PopulateTaskListFromXML(processDefinition.Bpmn20Xml);
-            FormFieldsDto formFields = new FormFieldsDto() { ProcessDefinitionKey= processDefinitionKey, ProcessInstanceId=processDefinition.Id };
+            var processInstance = await GetProcessInstance(this.processInstanceId);
+            FormFieldsDto formFields = new FormFieldsDto() { ProcessDefinitionKey= processDefinitionKey, ProcessDefinitionId = processDefinition.Id, ProcessInstanceId = processInstance.FirstOrDefault().Id };
             foreach (var task in taskListFromXML)
             {
                 if (task.Contains($"id=\"{taskKeyDefinitionOrTaskName}\"") || task.Contains($"name=\"{taskKeyDefinitionOrTaskName}\""))
@@ -99,17 +103,15 @@ namespace PublishingCompany.Camunda.BPMN
                         {
                             FormFieldValidator formFieldsValidators = new FormFieldValidator() { ValidatorName = r[i].Groups[1].Value.Replace("\"", ""), ValidatorConfig = "none" };
                             camundaFormField.Validators.Add(formFieldsValidators);
-                            //formFieldValidatorsList.Add(formFieldsValidators);
                             continue;
                         }
                         else if (r[i].Value.Contains("minlength") || r[i].Value.Contains("maxlength") || r[i].Value.Contains("min") || r[i].Value.Contains("max"))
                         {
                             FormFieldValidator formFieldsValidators = new FormFieldValidator() { ValidatorName = r[i].Groups[1].Value.Replace("\"", ""), ValidatorConfig = r[i + 1].Groups[1].Value.Replace("\"", "") };
                             camundaFormField.Validators.Add(formFieldsValidators);
-                            //formFieldValidatorsList.Add(formFieldsValidators);
                             continue;
                         }
-                        if (r[i].Value.Contains("id=") && i < 3)
+                        if (r[i].Value.Contains("id=") && string.IsNullOrEmpty(formFields.TaskId))
                         {
                             formFields.TaskId = r[i].Groups[1].Value.Replace("\"", "");
                             continue;
@@ -124,7 +126,7 @@ namespace PublishingCompany.Camunda.BPMN
                             formFields.FormKey = r[i].Groups[1].Value.Replace("\"", "");
                             continue;
                         }
-                        else if (r[i].Value.Contains("id=") && i >= 3)
+                        else if (r[i].Value.Contains("id="))
                         {
                             camundaFormField.FormId = r[i].Groups[1].Value.Replace("\"", "");
                             continue;
@@ -140,7 +142,6 @@ namespace PublishingCompany.Camunda.BPMN
                             continue;
                         }
                     }
-                    //camundaFormField.Validators = formFieldValidatorsList;
                     formFields.CamundaFormFields.Add(camundaFormField);
                 }
             }
@@ -171,7 +172,13 @@ namespace PublishingCompany.Camunda.BPMN
 
         public async Task<List<ProcessInstanceInfo>> GetProcessInstance(string processInstanceId)
         {
-            return await camunda.ProcessInstances.Query(new ProcessInstanceQuery() { ProcessDefinitionId = processInstanceId }).List();
+            return await camunda.ProcessInstances.Query(new ProcessInstanceQuery() { ProcessInstanceIds = new List<string>() { processInstanceId } }).List();
+        }
+
+        public async Task SetProcessVariableByProcessInstanceId(string processInstanceId, string values)
+        {
+            var processInstanceVariables = camunda.ProcessInstances[processInstanceId].Variables;
+            await processInstanceVariables.Set("registrationValues", VariableValue.FromObject(values));
         }
 
         public async Task<ProcessDefinitionInfo> GetProcessDefinitionKey()
@@ -182,14 +189,21 @@ namespace PublishingCompany.Camunda.BPMN
 
         public async Task<UserTaskInfo> GetFirstTask(string processInstanceId)
         {
+            this.processInstanceId = processInstanceId;
             var tasks = await camunda.UserTasks.Query(new TaskQuery() { ProcessInstanceId = processInstanceId }).List();
             return tasks.FirstOrDefault();
         }
 
-        public TaskResource GetRealUserTask(string taskId)
+        public async Task<UserTaskInfo> GetTaskById(string taskKey, string processInstanceId)
         {
-            var task = camunda.UserTasks[taskId];
-            return task;
+            var tasks = await camunda.UserTasks.Query(new TaskQuery() { TaskDefinitionKey = taskKey, ProcessInstanceId = processInstanceId }).List();
+            return tasks.FirstOrDefault();
+        }
+
+        public async Task<TaskResource> GetUserTaskResource(string taskKey)
+        {
+            var task = await camunda.UserTasks.Query(new TaskQuery() { TaskDefinitionKey = taskKey, ProcessInstanceId = this.processInstanceId }).List();
+            return camunda.UserTasks[task.FirstOrDefault().Id];
         }
 
         /// <summary>
@@ -256,7 +270,7 @@ namespace PublishingCompany.Camunda.BPMN
             //stara podesavanja vratiti kada se istestira 
             //var processStartResult = await
             //    camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processInstance);
-            processDefinitionId = "Process_Probe_12";
+            processDefinitionId = "Process_Probe_36";
             var processStartResult = await
                 camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;

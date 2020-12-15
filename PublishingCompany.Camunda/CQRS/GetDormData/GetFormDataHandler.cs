@@ -12,13 +12,11 @@ namespace PublishingCompany.Camunda.CQRS.GetDormData
 {
     public class GetFormDataHandler : IRequestHandler<GetFormDataRequest, GetFormDataResponse>
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly BpmnService _bpmnService;
 
-        public GetFormDataHandler(IUnitOfWork unitOfWork, IMapper mapper, BpmnService bpmnService)
+        public GetFormDataHandler(IMapper mapper, BpmnService bpmnService)
         {
-            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _bpmnService = bpmnService;
         }

@@ -9,6 +9,7 @@ namespace PublishingCompany.Camunda.DTO
     public class FormFieldsDto
     {
         public string ProcessInstanceId { get; set; }
+        public string ProcessDefinitionId { get; set; }
         public string ProcessDefinitionKey { get; set; }
         public string TaskId { get; set; }
         public string TaskName { get; set; }
