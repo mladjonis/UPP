@@ -9,5 +9,6 @@ namespace PublishingCompany.Camunda.CQRS.RegisterUser
     public class RegisterUserResponse
     {
         public string RegistrationStatus { get; set; }
+        public string ProcessInstanceId { get; set; }
     }
 }

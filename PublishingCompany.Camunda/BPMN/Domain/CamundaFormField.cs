@@ -10,6 +10,8 @@ namespace PublishingCompany.Camunda.BPMN.Domain
         public string FormId { get; set; }
         public string Label { get; set; }
         public string Type { get; set; }
+        public string DefaultValue { get; set; }
         public List<FormFieldValidator> Validators { get; set; } = new List<FormFieldValidator>();
+        public List<FormFieldValues> Values { get; set; } = new List<FormFieldValues>();
     }
 }

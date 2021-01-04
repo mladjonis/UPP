@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Domain.Enums
 {
-    public enum UserRegistrationStatus
+    public enum ApprovalStatus
     {
-        NotVerified = 0,
-        Verified
+        Approved = 0,
+        MoreMaterial,
+        Rejected,
+        Unknown
     }
 }

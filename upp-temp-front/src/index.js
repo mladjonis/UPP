@@ -6,6 +6,8 @@ import { createStore, applyMiddleware, compose } from "redux";
 import { Provider } from "react-redux";
 import thunk from "redux-thunk";
 import reducers from "./reducers";
+import { history } from "./history";
+import { Router } from "react-router-dom";
 //import reportWebVitals from './reportWebVitals';
 
 //remove on building
@@ -15,9 +17,11 @@ const store = createStore(reducers, composeEnhancers(applyMiddleware(thunk)));
 
 ReactDOM.render(
   <Provider store={store}>
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
+    <Router history={history}>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    </Router>
   </Provider>,
   document.getElementById("root")
 );

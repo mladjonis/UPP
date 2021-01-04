@@ -15,13 +15,12 @@ namespace PublishingCompany.Camunda.BPMN
             services.AddSingleton(_ => new BpmnService(camundaRestApiUri));
             //services.AddHostedService<BpmnProcessDeployService>();
 
-            //services.AddCamundaWorker(options =>
-            //{
-            //    options.BaseUri = new Uri(camundaRestApiUri);
-            //    options.WorkerCount = 1;
-            //})
-            //    // handlers for now if needed any add it here
-            //.AddHandler<WriterDataValidationHandler>()
+            services.AddCamundaWorker(options =>
+            {
+                options.BaseUri = new Uri(camundaRestApiUri);
+                options.WorkerCount = 1;
+            })
+            .AddHandler<WriterDataValidationHandler>();
             //.AddHandler<RegistrationEmailSendHandler>()
             //.AddHandler<NotifyWriterHandler>()
             //.AddHandler<RegistrationFinishHandler>();

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PublishingCompany.Camunda.Helpers.PasswordHasher
+namespace PublishingCompany.Camunda.CQRS.EmailConfirmationWriter
 {
-    public class PasswordHasher
+    public class EmailConfirmationWriterResponse
     {
     }
 }

@@ -1,12 +1,22 @@
 import React from "react";
-import FormFields from "../FormFields/FormFields";
+import { connect } from "react-redux";
+import { dummy } from "../../actions";
 
-const Home = () => {
+const Home = (props) => {
+  console.log(props);
   return (
-    <React.Fragment>
-      <FormFields />
-    </React.Fragment>
+    <div className="container">
+      {/*prosledi route propsOVE u child komponentu ako bude trebalo */}
+      <button onClick={() => props.dummy()}>asa</button>
+      {/* <FormFields {...props} /> */}
+    </div>
   );
 };
 
-export default Home;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    dummy: () => dispatch(dummy()),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(Home);

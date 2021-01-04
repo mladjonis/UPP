@@ -1,53 +1,130 @@
 import React from "react";
 import { connect } from "react-redux";
-import { compose } from "redux";
-import { fetchFormData, submitWriterForm } from "../../actions";
+import {
+  fetchFormData,
+  submitWriterForm,
+  startWriterProcess,
+} from "../../actions";
 
-// const formData = {
-//   processDefinitionId: "Process_Probe_12:2:c1caa886-3cc5-11eb-92f4-e4f89c5bfdff",
-//   processInstanceId: //TO NAM TREBA IZVUCI TO IZ APIJA
-//   processDefinitionKey: "Process_Probe_12",
-//   taskId: "registration_task",
-//   taskName: "Registration",
-//   formKey: "form_key",
-//   camundaFormFields: [
-//     {
-//       formId: "username",
-//       label: "Username",
-//       type: "string",
-//       validators: [
-//         {
-//           validatorName: "required",
-//           validatorConfig: "none",
-//         },
-//         {
-//           validatorName: "minlength",
-//           validatorConfig: "6",
-//         },
-//       ],
-//     },
-//   ],
-// };
+const formData = {
+  processDefinitionId:
+    "Process_Probe_12:2:c1caa886-3cc5-11eb-92f4-e4f89c5bfdff",
+  // processInstanceId: //TO NAM TREBA IZVUCI TO IZ APIJA
+  processDefinitionKey: "Process_Probe_12",
+  taskId: "registration_task",
+  taskName: "Registration",
+  formKey: "form_key",
+  camundaFormFields: [
+    {
+      formId: "username",
+      label: "Username",
+      type: "string",
+      defaultValue: "Akcija,Komedija,Biografija",
+      values: [
+        {
+          id: "odluka1",
+          name: "prodji",
+        },
+        {
+          id: "odluka2",
+          name: "jos materijala",
+        },
+      ],
+      validators: [
+        {
+          validatorName: "required",
+          validatorConfig: "none",
+        },
+        // {
+        //   validatorName: "minlength",
+        //   validatorConfig: "6",
+        // },
+      ],
+    },
+  ],
+};
 
 class FormFields extends React.Component {
-  componentDidMount() {
-    this.props.fetchFormData();
-  }
-
-  populateFormSendingList = (formListData) => {
-    let list = [];
-    formListData.forEach((value, key) =>
-      list.push({ FieldId: key, FieldValue: value })
-    );
-    return list;
+  state = {
+    zanrovi: formData,
+    genreRequirement: false,
   };
 
-  onFormSubmit = (event) => {
+  componentDidMount() {
+    this.props.startWriterProcess();
+    this.props.fetchFormData(this.props.processInstanceId);
+  }
+
+  // populateFormSendingList = (formListData) => {
+  //   let list = [];
+  //   let genresList = [];
+  //   formListData.forEach((value, key) => {
+  //     if (key == "genres") {
+  //       genresList.push(value);
+  //     } else {
+  //       list.push({ FieldId: key, FieldValue: value });
+  //     }
+  //   });
+  //   //spoji sve vrednosti pod kljucem genres iz niza genresList da bude string zbog modela u camundi
+  //   if (genresList.length > 0) {
+  //     let l2 = [{ FieldId: "genres", FieldValue: genresList.join(",") }];
+  //     this.setState({
+  //       ...this.state,
+  //       checkboxCondition: true,
+  //     });
+  //     return [...list, ...l2];
+  //   } else {
+  //     this.setState({ ...this.state, checkboxCondition: false });
+  //     return list;
+  //   }
+  // };
+
+  populateFormSendingList = async (formListData) => {
+    let sendingList = [];
+    let genresList = [];
+    let cometeeList = [];
+    formListData.forEach((value, key) => {
+      if (key === "genres") {
+        genresList.push(value);
+      } else if (key === "odluka") {
+        cometeeList.push(value);
+      } else {
+        sendingList.push({ FieldId: key, FieldValue: value });
+      }
+    });
+    console.log(genresList);
+    console.log(cometeeList);
+    if (genresList.length) {
+      let l2 = [{ FieldId: "genres", FieldValue: genresList.join(",") }];
+      await this.setStateAsync({ genreRequirement: true });
+      return [...sendingList, ...l2];
+    }
+    if (cometeeList.length) {
+      let l3 = [{ FieldId: "odluka", FieldValue: genresList }];
+    } else {
+      await this.setStateAsync({ genreRequirement: false });
+      return [...sendingList];
+    }
+  };
+
+  setStateAsync = (state) => {
+    return new Promise((resolve) => {
+      this.setState(state, resolve);
+    });
+  };
+
+  onFormSubmit = async (event) => {
     event.preventDefault();
+    console.log(event.target);
     const data = new FormData(event.target);
+    const listData = await this.populateFormSendingList(data);
     //format je recimo input-value pa onda input-name
+    console.log(this.state);
+
+    if (this.state.genreRequirement === false) return;
+    console.log(listData);
     this.props.submitWriterForm(
-      this.populateFormSendingList(data),
+      listData,
       this.props.formData.taskId,
       this.props.formData.processInstanceId,
       this.props.formData.processDefinitionId
@@ -55,13 +132,16 @@ class FormFields extends React.Component {
   };
 
   render() {
-    const { formData } = this.props;
+    const { formData, registrationResponse } = this.props;
+    console.log(this.props);
     return (
-      <form onSubmit={this.onFormSubmit}>
+      <div style={{ margin: "30px 400px", backgroundColor: "khaki" }}>
+        <h3 style={{ margin: "3px 40px" }}>Registracija pisca</h3>
+        {/* <form onSubmit={this.onFormSubmit}> */}
         {formData &&
           formData.camundaFormFields.map((field) => {
             return (
-              <React.Fragment>
+              <form onSubmit={this.onFormSubmit}>
                 {field.type === "long" ? (
                   <React.Fragment>
                     <label htmlFor={field.formId}> {field.label}</label>
@@ -102,6 +182,31 @@ class FormFields extends React.Component {
                           : false
                       }
                     />
+                  </React.Fragment>
+                ) : null}
+                {field.type === "string" && field.formId === "genres" ? (
+                  <React.Fragment>
+                    <label htmlFor={field.formId}> {field.label}</label>
+                    <select
+                      multiple={true}
+                      id={field.formId}
+                      name={field.label}
+                      required={
+                        field.validators.find(
+                          (z) => z.validatorName === "required"
+                        )
+                          ? true
+                          : false
+                      }
+                    >
+                      {field.defaultValue.split(",").map((val) => {
+                        return (
+                          <option key={val} value={val}>
+                            {val}
+                          </option>
+                        );
+                      })}
+                    </select>
                   </React.Fragment>
                 ) : null}
                 {field.type === "string" ? (
@@ -150,11 +255,55 @@ class FormFields extends React.Component {
                     />
                   </React.Fragment>
                 ) : null}
-              </React.Fragment>
+                {field.type === "enum" ? (
+                  <React.Fragment>
+                    <label htmlFor={field.formId}> {field.label}</label>
+                    <select
+                      id={field.formId}
+                      name={field.label}
+                      required={
+                        field.validators.find(
+                          (z) => z.validatorName === "required"
+                        )
+                          ? true
+                          : false
+                      }
+                    >
+                      {field.values.map((val) => {
+                        return (
+                          <option key={val.id} value={val.name}>
+                            {val.name}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </React.Fragment>
+                ) : null}
+                <button type="submit">Submit</button>
+                {/*proveri da li ima greske  */}
+              </form>
             );
           })}
-        <button type="submit">Submit</button>
-      </form>
+        {/* {this.state.zanrovi &&
+            this.state.zanrovi.camundaFormFields.map((value, idx) => {
+              return (
+                <React.Fragment>
+                  <label htmlFor={value.formId}>{value.label}</label>
+                  <select id={value.formId} name={value.label} multiple>
+                    {value.defaultValue.split(",").map((val) => {
+                      return (
+                        <option key={val} value={val}>
+                          {val}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </React.Fragment>
+              );
+            })} */}
+        {/* <button type="submit">Submit</button> */}
+        {/* </form> */}
+      </div>
     );
   }
 }
@@ -162,14 +311,18 @@ class FormFields extends React.Component {
 const mapStateToProps = (state) => {
   return {
     formData: state.form.formData,
+    registrationResponse: state.form.registrationResponse,
+    processInstanceId: state.form.processInstanceId,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    fetchFormData: () => dispatch(fetchFormData()),
+    fetchFormData: (processInstanceId) =>
+      dispatch(fetchFormData(processInstanceId)),
     submitWriterForm: (formListData, taskId, procInstanceId) =>
       dispatch(submitWriterForm(formListData, taskId, procInstanceId)),
+    startWriterProcess: () => dispatch(startWriterProcess()),
   };
 };
 

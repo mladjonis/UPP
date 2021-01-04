@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using PublishingCompany.Camunda.Helpers.ClientTokenGenerator;
 using PublishingCompany.Camunda.Helpers.FormSubmitMapper;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,8 @@ namespace PublishingCompany.Camunda.Helpers
     {
         public static IServiceCollection AddHelpers(this IServiceCollection services)
         {
-            services.AddTransient<IFormSubmitDtoMapper, FormSubmitDtoMapper>();
+            services.AddScoped<IFormSubmitDtoMapper, FormSubmitDtoMapper>();
+            services.AddScoped<IGenerateClientJwt, GenerateClientJwt>();
             return services;
         }
     }

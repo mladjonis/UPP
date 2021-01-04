@@ -8,5 +8,6 @@ namespace PublishingCompany.Camunda.CQRS.GetDormData
 {
     public class GetFormDataRequest: IRequest<GetFormDataResponse>
     {
+        public string ProcessId { get; set; }
     }
 }

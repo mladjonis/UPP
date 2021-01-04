@@ -23,10 +23,10 @@ namespace PublishingCompany.Camunda.CQRS.GetDormData
 
         public async Task<GetFormDataResponse> Handle(GetFormDataRequest request, CancellationToken cancellationToken)
         {
-            var processId = await _bpmnService.StartWriterRegistrationProcess();
+            //var processId = await _bpmnService.StartWriterRegistrationProcess();
             var processDefinition = await _bpmnService.GetProcessDefinitionKey();
 
-            var task = await _bpmnService.GetFirstTask(processId);
+            var task = await _bpmnService.GetFirstTask(request.ProcessId);
             var formData = await _bpmnService.GetFormData(processDefinition.Key, task.Name);
             var registerUserResponse = _mapper.Map<GetFormDataResponse>(formData);
 

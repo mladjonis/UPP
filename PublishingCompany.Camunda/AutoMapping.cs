@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Camunda.Api.Client.User;
 using PublishingCompany.Camunda.CQRS.GetDormData;
 using PublishingCompany.Camunda.CQRS.RegisterUser;
 using PublishingCompany.Camunda.Domain;
@@ -16,6 +17,13 @@ namespace PublishingCompany.Camunda
         {
             //add mapings
             CreateMap<FormFieldsDto, GetFormDataResponse>();
+            CreateMap<UserDto,User>();
+            CreateMap<User, UserProfileInfo>()
+                .ForMember(destination => destination.Id, src => src.MapFrom(s => s.UserName))
+                .ForMember(destination => destination.FirstName, src => src.MapFrom(s => s.Name))
+                .ForMember(destination => destination.LastName, src => src.MapFrom(s => s.Lastname))
+                .ForMember(destination => destination.Email, src => src.MapFrom(s => s.Email));
+
         }
     }
 }

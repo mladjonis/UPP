@@ -4,7 +4,6 @@ using PublishingCompany.Camunda.Repositories.Implementations;
 using PublishingCompany.Camunda.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,7 +16,6 @@ namespace PublishingCompany.Camunda.Repositories
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IGenreRepository, GenreRepository>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<CamundaContext>();
             return services;
         }
     }
