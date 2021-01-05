@@ -40,6 +40,7 @@ export const submitWriterForm = (
   });
   console.log(response);
   dispatch({ type: SUBMIT_FORM_DATA, payload: response.data });
+  history.push("/");
 };
 
 export const getGenres = () => async (dispatch) => {
@@ -56,15 +57,15 @@ export const startWriterProcess = () => async (dispatch) => {
 export const emailSubmit = (userId, token, processInstanceId) => async (
   dispatch
 ) => {
-  const response = await registrationApi.get(
-    "/EmailConfirmation/" + processInstanceId,
-    {
-      params: {
-        userId: userId,
-        token: token,
-      },
-    }
-  );
+  console.log(userId, token, processInstanceId);
+  const response = await registrationApi.get("/EmailConfirmation", {
+    params: {
+      userId: userId,
+      token: token,
+      processInstanceId: processInstanceId,
+    },
+  });
+  console.log(response);
   dispatch({ type: EMAIL_SUBMIT, payload: response.data });
 };
 
@@ -88,12 +89,13 @@ export const logout = () => async (dispatch) => {
   localStorage.removeItem("user");
 };
 
-export const uploadDocuments = (documents) => async (dispatch) => {
+export const uploadDocuments = (documents, procId) => async (dispatch) => {
   let formData = new FormData();
   for (let i = 0; i < documents.length; i++) {
     const file = documents[i];
     formData.append("FormFiles", file);
   }
+  formData.append("ProcessInstanceId", procId);
   await fileApi.post("/UploadDocuments", formData);
   dispatch({ type: DOC_UPLOAD });
   history.push("/");

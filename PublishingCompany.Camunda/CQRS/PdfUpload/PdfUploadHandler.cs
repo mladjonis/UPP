@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using PublishingCompany.Camunda.BPMN;
 using PublishingCompany.Camunda.Domain;
+using PublishingCompany.Camunda.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,11 +16,13 @@ namespace PublishingCompany.Camunda.CQRS.PdfUpload
     {
         private readonly BpmnService _bpmnService;
         private readonly UserManager<User> _userManager;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public PdfUploadHandler(BpmnService bpmnService, UserManager<User> userManager)
+        public PdfUploadHandler(BpmnService bpmnService, UserManager<User> userManager, IUnitOfWork unitOfWork)
         {
             _bpmnService = bpmnService;
             _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<PdfUploadResponse> Handle(PdfUploadRequest request, CancellationToken cancellationToken)
@@ -43,11 +46,18 @@ namespace PublishingCompany.Camunda.CQRS.PdfUpload
                         await file.CopyToAsync(stream);
                     }
                 }
-            }catch(Exception e)
+                var processInstanceResource = _bpmnService.GetProcessInstanceResource(request.ProcessInstanceId);
+                var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
+                var user = _unitOfWork.Users.GetUserByEmail(userEmail);
+                var task = await _bpmnService.GetFirstTask(request.ProcessInstanceId);
+                await _bpmnService.ClaimTask(task.Id, user.UserName);
+                await _bpmnService.CompleteTask(task.Id);
+                response.Status = "Uploaded successfully";
+            }
+            catch(Exception e)
             {
                 response.Status = e.Message;
             }
-            response.Status = "Uploaded successfully";
             return response;
         }
     }

@@ -9,5 +9,6 @@ namespace PublishingCompany.Camunda.DTO
     {
         public string UserId { get; set; }
         public string Token { get; set; }
+        public string ProcessInstanceId { get; set; }
     }
 }

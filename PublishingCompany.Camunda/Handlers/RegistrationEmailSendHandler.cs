@@ -44,7 +44,7 @@ namespace PublishingCompany.Camunda.Handlers
                 var user = await _userManager.FindByEmailAsync(userEmail);
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 await _bpmnService.SetProcessVariableByProcessInstanceId("token", externalTask.ProcessInstanceId, token);
-                var confirmationLink = BuildQueryString(user.Id, token);
+                var confirmationLink = BuildQueryString(user.Id, token, externalTask.ProcessInstanceId);
                 await _emailService.SendAsync(userEmail, "Email verification", $"<a href=\"{confirmationLink}\">Verify</a>", true);
             }
             catch(Exception e)
@@ -60,7 +60,7 @@ namespace PublishingCompany.Camunda.Handlers
             return new CompleteResult() { };
         }
 
-        private Uri BuildQueryString(Guid userId, string token)
+        private Uri BuildQueryString(Guid userId, string token, string processInstanceId)
         {
             var url = new UriBuilder("http://localhost:3000/email-confirmation");
 
@@ -68,6 +68,7 @@ namespace PublishingCompany.Camunda.Handlers
                     {
                         {"userId", userId.ToString()},
                         {"token", token},
+                        {"processInstanceId", processInstanceId }
                     }).ReadAsStringAsync().Result;
             return url.Uri;
         }

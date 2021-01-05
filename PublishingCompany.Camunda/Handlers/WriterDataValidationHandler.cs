@@ -56,7 +56,8 @@ namespace PublishingCompany.Camunda.Handlers
 
                 //proveri da li korisnik sa tim emailom postoji u bazi vec
                 var userExist = _unitOfWork.Users.GetUserByEmail(userDto.Email);
-                if (userExist != null)
+                var userNameExists = _unitOfWork.Users.Find(x => x.UserName.Equals(userDto.Username)).ToList().FirstOrDefault();
+                if (userExist != null && userNameExists != null)
                 {
                     //    //postavi procesnu varijablu validacija na false jer valdiacija nije prosla - vec je postavljena u bpmnService klasi
                     return new CompleteResult()

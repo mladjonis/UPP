@@ -45,7 +45,6 @@ namespace PublishingCompany.Camunda.CQRS.RegisterUser
                 registerUserResponse.ProcessInstanceId = request.ProcessInstanceId;
                 // set sent values to processInstanceVariables
                 await _bpmnService.SetProcessVariableByProcessInstanceId("registrationValues", request.ProcessInstanceId, request.SubmitFields);
-                await Task.Delay(2000);
             }
             catch (Exception e)
             {

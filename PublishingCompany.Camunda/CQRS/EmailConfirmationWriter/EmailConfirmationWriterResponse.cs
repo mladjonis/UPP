@@ -7,5 +7,6 @@ namespace PublishingCompany.Camunda.CQRS.EmailConfirmationWriter
 {
     public class EmailConfirmationWriterResponse
     {
+        public string Status { get; set; }
     }
 }

@@ -17,7 +17,8 @@ namespace PublishingCompany.Camunda
         {
             //add mapings
             CreateMap<FormFieldsDto, GetFormDataResponse>();
-            CreateMap<UserDto,User>();
+            CreateMap<UserDto, User>()
+                .ForMember(destination => destination.UserName, src => src.MapFrom(s => s.Username));
             CreateMap<User, UserProfileInfo>()
                 .ForMember(destination => destination.Id, src => src.MapFrom(s => s.UserName))
                 .ForMember(destination => destination.FirstName, src => src.MapFrom(s => s.Name))

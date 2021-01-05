@@ -456,7 +456,7 @@ namespace PublishingCompany.Camunda.BPMN
             //stara podesavanja vratiti kada se istestira 
             //var processStartResult = await
             //    camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processInstance);
-            processDefinitionId = "Process_ASAAAAA";
+            processDefinitionId = "Process_Writer_Registration1";
             var processStartResult = await
                 camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;

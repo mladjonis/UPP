@@ -27,6 +27,8 @@ const formReducer = (state = initState, action) => {
     case SUBMIT_FORM_DATA:
       return { ...state, registrationResponse: action.payload };
     case START_PROCESS:
+      console.log(action.payload);
+      console.log(state);
       return { ...state, processInstanceId: action.payload };
     case EMAIL_SUBMIT:
       return { ...state, emailConfirmation: action.payload };

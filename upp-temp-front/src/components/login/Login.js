@@ -3,12 +3,10 @@ import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { login } from "../../actions";
 
-//ISPOBATI PRVO I PRVO ZJEBANCIJU SA ZANROVIMA DA BUDE ENUMERACIJA ZA POCETAK I ISPROBATI SA DEFAULTNIM VREDNOSTIMA IZ MODELA TO UPARSIRATI JEBENO
-//NAPRAVITI U FORMFIELDS KOMPONENTI DA SE TO DINAMICKI SREDI
 //napraviti novi proces da se isproba ovo sa komisijom
 //namestiti claimovanje taskova komisije
 //napraviti za njih poseban endpoint na front u i backu da vraca podatke koje treba sta znam koje...
-//i probati flow zbog svega ovoga asinhronog, to prvo! pa onda sve ostalo
+
 class Login extends React.Component {
   state = {
     password: "",

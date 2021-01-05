@@ -50,7 +50,7 @@ namespace PublishingCompany.Camunda
             });
 
             builder = new IdentityBuilder(builder.UserType, typeof(Role), builder.Services);
-            builder.AddEntityFrameworkStores<CamundaContext>();
+            builder.AddEntityFrameworkStores<CamundaContext>().AddDefaultTokenProviders();
             builder.AddRoleValidator<RoleValidator<Role>>();
             builder.AddRoleManager<RoleManager<Role>>();
             builder.AddSignInManager<SignInManager<User>>();

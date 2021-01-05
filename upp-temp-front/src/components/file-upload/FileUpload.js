@@ -16,7 +16,7 @@ const FileUpload = (props) => {
       return;
     }
     setDocCount(true);
-    props.uploadDocuments(files);
+    props.uploadDocuments(files, props.processInstanceId);
   };
 
   return (
@@ -28,10 +28,18 @@ const FileUpload = (props) => {
   );
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapStateToProps = (state) => {
+  console.log(state);
   return {
-    uploadDocuments: (files) => dispatch(uploadDocuments(files)),
+    processInstanceId: state.form.processInstanceId,
   };
 };
 
-export default connect(null, mapDispatchToProps)(FileUpload);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    uploadDocuments: (files, procInstId) =>
+      dispatch(uploadDocuments(files, procInstId)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(FileUpload);

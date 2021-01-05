@@ -12,5 +12,6 @@ namespace PublishingCompany.Camunda.CQRS.PdfUpload
     {
         public List<IFormFile> FormFiles { get; set; }
         public User User { get; set; }
+        public string ProcessInstanceId { get; set; }
     }
 }

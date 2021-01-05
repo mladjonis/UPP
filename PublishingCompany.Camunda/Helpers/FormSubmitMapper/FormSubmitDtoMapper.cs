@@ -82,7 +82,11 @@ namespace PublishingCompany.Camunda.Helpers.FormSubmitMapper
                     //var propName = myPropInfo.GetValue(data.FieldId);
                     userDto.Username = (string)data.FieldValue;
                 }
-                 if (data.FieldId.Equals("lastname"))
+                if (data.FieldId.Equals("name"))
+                {
+                    userDto.Name = (string)data.FieldValue;
+                }
+                 if (data.FieldId.Equals("last_name"))
                 {
                     userDto.Lastname = (string)data.FieldValue;
                 }

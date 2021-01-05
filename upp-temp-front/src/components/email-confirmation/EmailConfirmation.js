@@ -1,39 +1,48 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import { emailSubmit } from "../../actions";
 
-const EmailConfirmation = (props) => {
-  const {
-    emailSubmit,
-    history,
-    emailConfirmation,
-    location,
-    processInstanceId,
-  } = props;
-  useEffect(() => {
-    let urlSearchParams = new URLSearchParams(location.search);
-    let userId = urlSearchParams.get("userId");
-    let token = urlSearchParams.get("token");
-    emailSubmit(userId, token, processInstanceId);
-  }, [emailSubmit, location, processInstanceId]);
-  return (
-    <div>
-      <div>Validacija u toku</div>
-      {!emailConfirmation ? (
-        <div>
-          Validacija uspesna bicete preusmereni na login
-          {setTimeout(() => {
-            history.push("/login");
-          }, 1000)}
-        </div>
-      ) : (
-        <div>Desila se greska prilikom validacije pokusajte ponovo</div>
-      )}
-    </div>
-  );
-};
+class EmailConfirmation extends React.Component {
+  state = {
+    isRedirected: true,
+  };
+
+  componentDidMount() {
+    let urlSearchParams = new URLSearchParams(this.props.location.search);
+    if (!urlSearchParams) {
+      let userId = urlSearchParams.get("userId");
+      let token = urlSearchParams.get("token");
+      let procInstId = urlSearchParams.get("processInstanceId");
+      this.props.emailSubmit(userId, token, procInstId);
+    } else {
+      this.setState({ isRedirected: false });
+    }
+  }
+
+  render() {
+    return (
+      <div>
+        {!this.state.isRedirected ? (
+          <div>Proverite email za verifikaciju naloga</div>
+        ) : (
+          <>
+            <div>Validacija u toku</div>
+            <div>
+              Bicete preusmereni na login, ako ste uneli dobar link bicete
+              verifikovani
+              {setTimeout(() => {
+                this.props.history.push("/login");
+              }, 1000)}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+}
 
 const mapStateToProps = (state) => {
+  console.log(state);
   return {
     emailConfirmation: state.form.emailConfirmation,
     processInstanceId: state.form.processInstanceId,
@@ -42,7 +51,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    emailSubmit: (userId, token) => dispatch(emailSubmit(userId, token)),
+    emailSubmit: (userId, token, processInstanceId) =>
+      dispatch(emailSubmit(userId, token, processInstanceId)),
   };
 };
 

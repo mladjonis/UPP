@@ -19,6 +19,7 @@ namespace PublishingCompany.Camunda.CQRS.EmailConfirmationWriter
 
         public async Task<EmailConfirmationWriterResponse> Handle(EmailConfirmationWriterRequest request, CancellationToken cancellationToken)
         {
+            var emailResponse = new EmailConfirmationWriterResponse();
             try
             {
                 var processInstanceResource = _bpmnService.GetProcessInstanceResource(request.ProcessInstanceId);
@@ -26,14 +27,17 @@ namespace PublishingCompany.Camunda.CQRS.EmailConfirmationWriter
 
                 var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
                 var camundaUser = await _bpmnService.GetUser(userEmail);
-                //klejmuj i komplituj task posle ovoga 
+                //klejmuj i komplituj task posle ovoga
+                //done he he 
                 var claimedTask = await _bpmnService.ClaimTask(task.Id, camundaUser.Id);
                 var completedTask = await _bpmnService.CompleteTask(task.Id);
+                emailResponse.Status = "";
             }catch(Exception e)
             {
-
+                //logger
+                emailResponse.Status = e.Message;
             }
-            return new EmailConfirmationWriterResponse();
+            return emailResponse;
         }
     }
 }

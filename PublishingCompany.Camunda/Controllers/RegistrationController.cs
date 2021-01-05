@@ -67,9 +67,9 @@ namespace PublishingCompany.Camunda.Controllers
 
         //treba ubaciti u cqrs isto da kada klikne na ovo fino ga napravi ali za sada neka ovde ima jako malo koda
         [HttpGet("EmailConfirmation")]
-        public async Task<ActionResult> EmailConfirmationAsync(string processInstanceId, [FromQuery] EmailConfirmationDto dto)
+        public async Task<ActionResult> EmailConfirmationAsync([FromQuery] EmailConfirmationDto dto)
         {
-            var response = await _mediator.Send(new EmailConfirmationWriterRequest() {ProcessInstanceId = processInstanceId, UserId = dto.UserId, Token = dto.Token });
+            var response = await _mediator.Send(new EmailConfirmationWriterRequest() {ProcessInstanceId = dto.ProcessInstanceId, UserId = dto.UserId, Token = dto.Token });
             return Ok(response);
         }
 
