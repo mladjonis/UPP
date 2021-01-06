@@ -14,7 +14,7 @@ namespace PublishingCompany.Camunda.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles ="Writer")]
+    //[Authorize(Roles ="Writer")]
     public class FileController : ControllerBase
     {
         private readonly IMediator _mediator;

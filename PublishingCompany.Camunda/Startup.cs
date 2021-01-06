@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using NETCore.MailKit.Extensions;
@@ -16,6 +17,7 @@ using PublishingCompany.Camunda.DbConfig;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.Helpers;
 using PublishingCompany.Camunda.Repositories;
+using System.IO;
 using System.Text;
 
 namespace PublishingCompany.Camunda
@@ -116,7 +118,12 @@ namespace PublishingCompany.Camunda
 
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
-            app.UseStaticFiles("/docs");
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                     Path.Combine(env.ContentRootPath, "docs")),
+                RequestPath = "/docs"
+            });
 
             app.UseRouting();
 

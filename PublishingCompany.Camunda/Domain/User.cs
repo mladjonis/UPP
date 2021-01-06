@@ -16,7 +16,7 @@ namespace PublishingCompany.Camunda.Domain
         public string City { get; set; }
         public string State { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; } = ApprovalStatus.Unknown;
-        public string Comment { get; set; }
+        public string Files { get; set; }
         public List<CometeeComment> CometeeComments { get; set; }
         public List<UserRole> UserRoles { get; set; }
         public List<Genre> Genres { get; set; }

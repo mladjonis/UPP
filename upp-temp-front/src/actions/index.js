@@ -10,10 +10,12 @@ import {
   LOGIN,
   EMAIL_SUBMIT,
   DOC_UPLOAD,
+  GET_COMETEE_USERS,
 } from "./types";
 import { registrationApi } from "../apis/registration";
 import { genresApi } from "../apis/genres";
 import { fileApi } from "../apis/file";
+import { cometeeApi } from "../apis/cometee";
 import jwtDecode from "jwt-decode";
 import { history } from "../history";
 
@@ -99,6 +101,24 @@ export const uploadDocuments = (documents, procId) => async (dispatch) => {
   await fileApi.post("/UploadDocuments", formData);
   dispatch({ type: DOC_UPLOAD });
   history.push("/");
+};
+
+export const submitCometeeForm = (
+  formListData,
+  taskId,
+  procInstanceId
+) => async (dispatch) => {
+  const response = await cometeeApi.post("/SubmitCometeeForm", {
+    SubmitFields: formListData,
+    TaskId: taskId,
+    ProcessInstanceId: procInstanceId,
+  });
+  dispatch({ type: SUBMIT_FORM_DATA, payload: response.data });
+};
+
+export const getCometeeUsers = () => async (dispatch) => {
+  const response = await cometeeApi.get("/GetUsersToApprove");
+  dispatch({ type: GET_COMETEE_USERS, payload: response.data });
 };
 
 export const dummy = () => async (dispatch) => {

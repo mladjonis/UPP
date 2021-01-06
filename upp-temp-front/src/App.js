@@ -6,6 +6,7 @@ import Login from "./components/login/Login";
 import Navbar from "./components/navbar/Navbar";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import FileUpload from "./components/file-upload/FileUpload";
+import DecisionsDetails from "./components/cometee/DecisionsDetails";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/registration" component={Registration} />
           <Route path="/email-confirmation" component={EmailConfirmation} />
           <Route path="/upload" component={FileUpload} />
+          <Route path="/cometee" component={DecisionsDetails} />
         </Switch>
       </React.Fragment>
     </BrowserRouter>

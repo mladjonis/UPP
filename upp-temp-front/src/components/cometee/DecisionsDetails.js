@@ -1,109 +1,75 @@
 import React from "react";
 import { connect } from "react-redux";
-import {
-  fetchFormData,
-  submitWriterForm,
-  startWriterProcess,
-} from "../../actions";
+import { fetchFormData, submitCometeeForm } from "../../actions";
 
 const formData = {
-  processDefinitionId:
-    "Process_Probe_12:2:c1caa886-3cc5-11eb-92f4-e4f89c5bfdff",
-  // processInstanceId: //TO NAM TREBA IZVUCI TO IZ APIJA
-  processDefinitionKey: "Process_Probe_12",
-  taskId: "registration_task",
-  taskName: "Registration",
-  formKey: "form_key",
+  processInstanceId: "aade0973-4fcd-11eb-9997-e4f89c5bfdff",
+  processDefinitionKey: "Process_0abkzqf",
+  taskId: "Activity_0yqye3f",
+  taskName: "asa",
+  formKey: null,
   camundaFormFields: [
     {
-      formId: "username",
-      label: "Username",
+      formId: "komentar",
+      label: "Komentar",
       type: "string",
-      defaultValue: "Akcija,Komedija,Biografija",
-      values: [
-        {
-          id: "odluka1",
-          name: "prodji",
-        },
-        {
-          id: "odluka2",
-          name: "jos materijala",
-        },
-      ],
+      defaultValue: null,
       validators: [
         {
           validatorName: "required",
-          validatorConfig: "none",
+          validatorConfig: null,
         },
-        // {
-        //   validatorName: "minlength",
-        //   validatorConfig: "6",
-        // },
+      ],
+      values: [],
+    },
+    {
+      formId: "odluka",
+      label: "Odluka",
+      type: "enum",
+      defaultValue: null,
+      validators: [],
+      values: [
+        {
+          id: "odluka1",
+          label: null,
+          name: "111111",
+        },
+        {
+          id: "odluka2",
+          label: null,
+          name: "222222",
+        },
       ],
     },
   ],
 };
 
-class FormFields extends React.Component {
+class DecisionsDetails extends React.Component {
   state = {
-    zanrovi: formData,
-    genreRequirement: false,
+    odlukaRequirement: false,
   };
 
   async componentDidMount() {
-    console.log(this.props);
-    await this.props.startWriterProcess();
     await this.props.fetchFormData(this.props.processInstanceId);
   }
 
-  // populateFormSendingList = (formListData) => {
-  //   let list = [];
-  //   let genresList = [];
-  //   formListData.forEach((value, key) => {
-  //     if (key == "genres") {
-  //       genresList.push(value);
-  //     } else {
-  //       list.push({ FieldId: key, FieldValue: value });
-  //     }
-  //   });
-  //   //spoji sve vrednosti pod kljucem genres iz niza genresList da bude string zbog modela u camundi
-  //   if (genresList.length > 0) {
-  //     let l2 = [{ FieldId: "genres", FieldValue: genresList.join(",") }];
-  //     this.setState({
-  //       ...this.state,
-  //       checkboxCondition: true,
-  //     });
-  //     return [...list, ...l2];
-  //   } else {
-  //     this.setState({ ...this.state, checkboxCondition: false });
-  //     return list;
-  //   }
-  // };
-
   populateFormSendingList = async (formListData) => {
     let sendingList = [];
-    let genresList = [];
     let cometeeList = [];
     formListData.forEach((value, key) => {
-      if (key === "Genres") {
-        genresList.push(value);
-      } else if (key === "Odluka") {
+      if (key === "Odluka") {
         cometeeList.push(value);
       } else {
         sendingList.push({ FieldId: key, FieldValue: value });
       }
     });
-    console.log(genresList);
-    console.log(cometeeList);
-    if (genresList.length > 0) {
-      let l2 = [{ FieldId: "genres", FieldValue: genresList.join(",") }];
-      await this.setStateAsync({ genreRequirement: true });
-      console.log(this.state);
-      return [...sendingList, ...l2];
-    } else if (cometeeList.length > 0) {
-      let l3 = [{ FieldId: "odluka", FieldValue: genresList }];
+
+    if (cometeeList.length > 0) {
+      let l3 = [{ FieldId: "odluka", FieldValue: cometeeList[0] }];
+      await this.setStateAsync({ odlukaRequirement: true });
+      return [...sendingList, ...l3];
     } else {
-      await this.setStateAsync({ genreRequirement: false });
+      await this.setStateAsync({ odlukaRequirement: false });
       return [...sendingList];
     }
   };
@@ -122,19 +88,21 @@ class FormFields extends React.Component {
     //format je recimo input-value pa onda input-name
     console.log(this.state);
 
-    if (this.state.genreRequirement === false) return;
+    if (this.state.odluka === false) return;
     console.log(listData);
-    await this.props.submitWriterForm(
+    this.props.submitCometeeForm(
       listData,
+      // formData.taskId,
+      // formData.processInstanceId,
+      // formData.processDefinitionKey
       this.props.formData.taskId,
       this.props.formData.processInstanceId,
       this.props.formData.processDefinitionId
     );
-    this.props.history.push("/email-confirmation");
   };
 
   render() {
-    const { formData, registrationResponse } = this.props;
+    const { formData } = this.props;
     console.log(this.props);
     return (
       <div style={{ margin: "30px 400px", backgroundColor: "khaki" }}>
@@ -383,7 +351,7 @@ class FormFields extends React.Component {
                       >
                         {field.values.map((val) => {
                           return (
-                            <option key={val.id} value={val.name}>
+                            <option key={val.id} value={val.id}>
                               {val.name}
                             </option>
                           );
@@ -408,7 +376,6 @@ const mapStateToProps = (state) => {
   console.log(state);
   return {
     formData: state.form.formData,
-    registrationResponse: state.form.registrationResponse,
     processInstanceId: state.form.processInstanceId,
   };
 };
@@ -417,10 +384,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchFormData: (processInstanceId) =>
       dispatch(fetchFormData(processInstanceId)),
-    submitWriterForm: (formListData, taskId, procInstanceId) =>
-      dispatch(submitWriterForm(formListData, taskId, procInstanceId)),
-    startWriterProcess: () => dispatch(startWriterProcess()),
+    submitCometeeForm: (formListData, taskId, procInstanceId) =>
+      dispatch(submitCometeeForm(formListData, taskId, procInstanceId)),
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(FormFields);
+export default connect(mapStateToProps, mapDispatchToProps)(DecisionsDetails);

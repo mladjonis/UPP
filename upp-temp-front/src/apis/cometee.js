@@ -1,10 +1,10 @@
 import axios from "axios";
 
-export const fileApi = axios.create({
+export const cometeeApi = axios.create({
   baseURL: "https://localhost:44343/api/Cometee",
 });
 
-fileApi.interceptors.request.use((config) => {
+cometeeApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   config.headers = {
     Authorization: `Bearer ${token}`,

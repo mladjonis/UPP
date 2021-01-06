@@ -12,6 +12,7 @@ using PublishingCompany.Camunda.CQRS.RegisterUser;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.DTO;
 using PublishingCompany.Camunda.Helpers.ClientTokenGenerator;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Controllers
@@ -65,7 +66,6 @@ namespace PublishingCompany.Camunda.Controllers
             return Ok(response);
         }
 
-        //treba ubaciti u cqrs isto da kada klikne na ovo fino ga napravi ali za sada neka ovde ima jako malo koda
         [HttpGet("EmailConfirmation")]
         public async Task<ActionResult> EmailConfirmationAsync([FromQuery] EmailConfirmationDto dto)
         {

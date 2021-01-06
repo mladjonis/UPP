@@ -37,21 +37,25 @@ namespace PublishingCompany.Camunda.CQRS.PdfUpload
                     Directory.CreateDirectory(userPath);
                 }
 
+                var processInstanceResource = _bpmnService.GetProcessInstanceResource(request.ProcessInstanceId);
+                var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
+                var user = _unitOfWork.Users.GetUserByEmail(userEmail);
 
-                //srediti putanju da upada u folder a ne vani
                 foreach (var file in request.FormFiles)
                 {
                     using (FileStream stream = new FileStream(Path.Combine(userPath,file.FileName), FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
+                        user.Files += "https://localhost:44341/docs/" + $"{user.UserName}/" + $"{file.FileName},";
                     }
                 }
-                var processInstanceResource = _bpmnService.GetProcessInstanceResource(request.ProcessInstanceId);
-                var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
-                var user = _unitOfWork.Users.GetUserByEmail(userEmail);
+                _unitOfWork.Users.Update(user);
+                _unitOfWork.Complete();
+
                 var task = await _bpmnService.GetFirstTask(request.ProcessInstanceId);
                 await _bpmnService.ClaimTask(task.Id, user.UserName);
                 await _bpmnService.CompleteTask(task.Id);
+                await _bpmnService.SetProcessVariableByProcessInstanceId("documentCountRequired", request.ProcessInstanceId, true);
                 response.Status = "Uploaded successfully";
             }
             catch(Exception e)

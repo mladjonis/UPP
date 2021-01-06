@@ -7,6 +7,8 @@ import {
   EMAIL_SUBMIT,
   LOGIN,
   DOC_UPLOAD,
+  SUBMIT_COMETEE_FORM_DATA,
+  GET_COMETEE_USERS,
 } from "../actions/types";
 
 const initState = {
@@ -15,7 +17,9 @@ const initState = {
   registrationResponse: null,
   processInstanceId: null,
   emailConfirmation: null,
+  cometeeRespone: null,
   auth: null,
+  cometeeUsers: [],
 };
 
 const formReducer = (state = initState, action) => {
@@ -26,12 +30,14 @@ const formReducer = (state = initState, action) => {
       return { ...state, error: action.error };
     case SUBMIT_FORM_DATA:
       return { ...state, registrationResponse: action.payload };
+    case SUBMIT_COMETEE_FORM_DATA:
+      return { ...state, cometeeRespone: action.payload };
     case START_PROCESS:
-      console.log(action.payload);
-      console.log(state);
       return { ...state, processInstanceId: action.payload };
     case EMAIL_SUBMIT:
       return { ...state, emailConfirmation: action.payload };
+    case GET_COMETEE_USERS:
+      return { ...state, cometeeUsers: [...action.payload] };
     case LOGIN:
       return { ...state, auth: action.payload };
     case DOC_UPLOAD:
