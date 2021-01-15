@@ -82,13 +82,19 @@ export const login = (loginDto) => async (dispatch) => {
     localStorage.setItem("user", JSON.stringify(response.data.user));
   }
   dispatch({ type: LOGIN, payload: response.data });
+  if (response.data.user.userRoles.find((x) => x.role.name === "Writer")) {
+    history.push("/upload");
+  } else {
+    history.push("/");
+  }
 };
 
 export const logout = () => async (dispatch) => {
   console.log("usao u logout");
-  await registrationApi.get("/Logout");
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+  history.push("/");
+  await registrationApi.get("/Logout");
 };
 
 export const uploadDocuments = (documents, procId) => async (dispatch) => {
@@ -119,6 +125,18 @@ export const submitCometeeForm = (
 export const getCometeeUsers = () => async (dispatch) => {
   const response = await cometeeApi.get("/GetUsersToApprove");
   dispatch({ type: GET_COMETEE_USERS, payload: response.data });
+};
+
+export const fetchFormDataCometee = (procId, taskNameOrId) => async (
+  dispatch
+) => {
+  const response = await cometeeApi.get("/GetFormData", {
+    params: {
+      ProcessInstanceId: procId,
+      TaskNameOrId: taskNameOrId,
+    },
+  });
+  dispatch({ type: FETCH_FORM_DATA, payload: response.data });
 };
 
 export const dummy = () => async (dispatch) => {

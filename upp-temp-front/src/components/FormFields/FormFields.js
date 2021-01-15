@@ -5,6 +5,7 @@ import {
   submitWriterForm,
   startWriterProcess,
 } from "../../actions";
+import { history } from "../../history";
 
 const formData = {
   processDefinitionId:
@@ -130,7 +131,7 @@ class FormFields extends React.Component {
       this.props.formData.processInstanceId,
       this.props.formData.processDefinitionId
     );
-    this.props.history.push("/email-confirmation");
+    history.push("/email-confirmation");
   };
 
   render() {

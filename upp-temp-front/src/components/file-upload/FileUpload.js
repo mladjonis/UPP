@@ -21,6 +21,7 @@ const FileUpload = (props) => {
 
   return (
     <React.Fragment>
+      <div>Upload atleast 2 document to be reviewed by cometee</div>
       <input type="file" onChange={saveFiles} multiple />
       <input type="button" value="Upload" onClick={onClick} />
       {!docCount ? <div>Atleast 2 document is required</div> : null}

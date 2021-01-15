@@ -1,6 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
-import { fetchFormData, submitCometeeForm } from "../../actions";
+import { Link } from "react-router-dom";
+import {
+  fetchFormData,
+  fetchFormDataCometee,
+  submitCometeeForm,
+  getCometeeUsers,
+} from "../../actions";
 
 const formData = {
   processInstanceId: "aade0973-4fcd-11eb-9997-e4f89c5bfdff",
@@ -50,7 +56,15 @@ class DecisionsDetails extends React.Component {
   };
 
   async componentDidMount() {
-    await this.props.fetchFormData(this.props.processInstanceId);
+    await this.props.getCometeeUsers();
+    await this.props.fetchFormDataCometee(
+      this.props.processInstanceId.processInstanceId,
+      "Commetee meeting"
+    );
+  }
+
+  async componentDidUpdate() {
+    await this.props.getCometeeUsers();
   }
 
   populateFormSendingList = async (formListData) => {
@@ -102,271 +116,302 @@ class DecisionsDetails extends React.Component {
   };
 
   render() {
-    const { formData } = this.props;
+    const { formData, cometeeUsers } = this.props;
     console.log(this.props);
     return (
-      <div style={{ margin: "30px 400px", backgroundColor: "khaki" }}>
-        <h3 style={{ margin: "3px 40px" }}>Registracija pisca</h3>
-        <form onSubmit={this.onFormSubmit}>
-          {formData &&
-            formData.camundaFormFields.map((field) => {
-              return (
-                <React.Fragment>
-                  {field.type === "long" ? (
-                    <div className="form-group">
-                      <label htmlFor={field.formId}> {field.label}</label>
-                      <input
-                        className="form-control"
-                        id={field.formId}
-                        name={field.formId}
-                        type="numeric"
-                        min={
-                          field.validators.find(
-                            (z) => z.validatorName === "min"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "min"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        max={
-                          field.validators.find(
-                            (z) => z.validatorName === "max"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "max"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        readOnly={
-                          field.validators.find(
-                            (z) => z.validatorName === "readonly"
-                          )
-                            ? true
-                            : false
-                        }
-                        required={
-                          field.validators.find(
-                            (z) => z.validatorName === "required"
-                          )
-                            ? true
-                            : false
-                        }
-                      />
-                    </div>
-                  ) : null}
-                  {field.type === "string" && field.formId === "genres" ? (
-                    <div className="form-group">
-                      <label htmlFor={field.formId}> {field.label}</label>
-                      <select
-                        className="form-control"
-                        multiple={true}
-                        id={field.formId}
-                        name={field.label}
-                        required={
-                          field.validators.find(
-                            (z) => z.validatorName === "required"
-                          )
-                            ? true
-                            : false
-                        }
-                      >
-                        {field.defaultValue.split(",").map((val) => {
-                          return (
-                            <option key={val} value={val}>
-                              {val}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
-                  ) : null}
-                  {field.type === "string" &&
-                  field.formId !== "genres" &&
-                  field.formId === "password" ? (
-                    <div className="form-group">
-                      <label htmlFor={field.formId}> {field.label}</label>
-                      <input
-                        className="form-control"
-                        id={field.formId}
-                        name={field.formId}
-                        type="password"
-                        minLength={
-                          field.validators.find(
-                            (z) => z.validatorName === "minlength"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "minlength"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        maxLength={
-                          field.validators.find(
-                            (z) => z.validatorName === "maxlength"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "maxlength"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        readOnly={
-                          field.validators.find(
-                            (z) => z.validatorName === "readonly"
-                          )
-                            ? true
-                            : false
-                        }
-                        required={
-                          field.validators.find(
-                            (z) => z.validatorName === "required"
-                          )
-                            ? true
-                            : false
-                        }
-                      />
-                    </div>
-                  ) : null}
-                  {field.type === "string" &&
-                  field.formId !== "genres" &&
-                  field.formId !== "password" &&
-                  field.formId !== "email" ? (
-                    <div className="form-group">
-                      <label htmlFor={field.formId}> {field.label}</label>
-                      <input
-                        className="form-control"
-                        id={field.formId}
-                        name={field.formId}
-                        type="text"
-                        minLength={
-                          field.validators.find(
-                            (z) => z.validatorName === "minlength"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "minlength"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        maxLength={
-                          field.validators.find(
-                            (z) => z.validatorName === "maxlength"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "maxlength"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        readOnly={
-                          field.validators.find(
-                            (z) => z.validatorName === "readonly"
-                          )
-                            ? true
-                            : false
-                        }
-                        required={
-                          field.validators.find(
-                            (z) => z.validatorName === "required"
-                          )
-                            ? true
-                            : false
-                        }
-                      />
-                    </div>
-                  ) : null}
-                  {field.type === "string" &&
-                  field.formId !== "genres" &&
-                  field.formId !== "password" &&
-                  field.formId === "email" ? (
-                    <div className="form-group">
-                      <label htmlFor={field.formId}> {field.label}</label>
-                      <input
-                        className="form-control"
-                        id={field.formId}
-                        name={field.formId}
-                        type="email"
-                        minLength={
-                          field.validators.find(
-                            (z) => z.validatorName === "minlength"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "minlength"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        maxLength={
-                          field.validators.find(
-                            (z) => z.validatorName === "maxlength"
-                          )
-                            ? field.validators[
-                                field.validators.findIndex(
-                                  (z) => z.validatorName === "maxlength"
-                                )
-                              ].validatorConfig
-                            : null
-                        }
-                        readOnly={
-                          field.validators.find(
-                            (z) => z.validatorName === "readonly"
-                          )
-                            ? true
-                            : false
-                        }
-                        required={
-                          field.validators.find(
-                            (z) => z.validatorName === "required"
-                          )
-                            ? true
-                            : false
-                        }
-                      />
-                    </div>
-                  ) : null}
-                  {field.type === "enum" ? (
-                    <div className="form-group">
-                      <label htmlFor={field.formId}> {field.label}</label>
-                      <select
-                        className="form-control"
-                        id={field.formId}
-                        name={field.label}
-                        required={
-                          field.validators.find(
-                            (z) => z.validatorName === "required"
-                          )
-                            ? true
-                            : false
-                        }
-                      >
-                        {field.values.map((val) => {
-                          return (
-                            <option key={val.id} value={val.id}>
-                              {val.name}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
-                  ) : null}
-                  {/*proveri da li ima greske  */}
-                </React.Fragment>
-              );
-            })}
-          <button type="submit" className="btn btn-primary">
-            Submit
-          </button>
-        </form>
+      <div style={{ backgroundColor: "khaki" }}>
+        <h3 style={{ margin: "3px 40px" }}>Validacija korisnika</h3>
+        {cometeeUsers &&
+          cometeeUsers.users.map((user) => {
+            return (
+              <>
+                <div>{user.email}</div>
+                {user.files &&
+                  user.files.split(",").map((link) => {
+                    return <a href={link}>Preview</a>;
+                  })}
+                <form onSubmit={this.onFormSubmit}>
+                  {formData &&
+                    formData.camundaFormFields.map((field) => {
+                      return (
+                        <React.Fragment>
+                          {field.type === "long" ? (
+                            <div className="form-group">
+                              <label htmlFor={field.formId}>
+                                {" "}
+                                {field.label}
+                              </label>
+                              <input
+                                className="form-control"
+                                id={field.formId}
+                                name={field.formId}
+                                type="numeric"
+                                min={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "min"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "min"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                max={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "max"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "max"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                readOnly={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "readonly"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                                required={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "required"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                              />
+                            </div>
+                          ) : null}
+                          {field.type === "string" &&
+                          field.formId === "genres" ? (
+                            <div className="form-group">
+                              <label htmlFor={field.formId}>
+                                {" "}
+                                {field.label}
+                              </label>
+                              <select
+                                className="form-control"
+                                multiple={true}
+                                id={field.formId}
+                                name={field.label}
+                                required={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "required"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                              >
+                                {field.defaultValue.split(",").map((val) => {
+                                  return (
+                                    <option key={val} value={val}>
+                                      {val}
+                                    </option>
+                                  );
+                                })}
+                              </select>
+                            </div>
+                          ) : null}
+                          {field.type === "string" &&
+                          field.formId !== "genres" &&
+                          field.formId === "password" ? (
+                            <div className="form-group">
+                              <label htmlFor={field.formId}>
+                                {" "}
+                                {field.label}
+                              </label>
+                              <input
+                                className="form-control"
+                                id={field.formId}
+                                name={field.formId}
+                                type="password"
+                                minLength={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "minlength"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "minlength"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                maxLength={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "maxlength"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "maxlength"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                readOnly={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "readonly"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                                required={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "required"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                              />
+                            </div>
+                          ) : null}
+                          {field.type === "string" &&
+                          field.formId !== "genres" &&
+                          field.formId !== "password" &&
+                          field.formId !== "email" ? (
+                            <div className="form-group">
+                              <label htmlFor={field.formId}>
+                                {" "}
+                                {field.label}
+                              </label>
+                              <input
+                                className="form-control"
+                                id={field.formId}
+                                name={field.formId}
+                                type="text"
+                                minLength={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "minlength"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "minlength"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                maxLength={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "maxlength"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "maxlength"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                readOnly={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "readonly"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                                required={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "required"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                              />
+                            </div>
+                          ) : null}
+                          {field.type === "string" &&
+                          field.formId !== "genres" &&
+                          field.formId !== "password" &&
+                          field.formId === "email" ? (
+                            <div className="form-group">
+                              <label htmlFor={field.formId}>
+                                {" "}
+                                {field.label}
+                              </label>
+                              <input
+                                className="form-control"
+                                id={field.formId}
+                                name={field.formId}
+                                type="email"
+                                minLength={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "minlength"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "minlength"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                maxLength={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "maxlength"
+                                  )
+                                    ? field.validators[
+                                        field.validators.findIndex(
+                                          (z) => z.validatorName === "maxlength"
+                                        )
+                                      ].validatorConfig
+                                    : null
+                                }
+                                readOnly={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "readonly"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                                required={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "required"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                              />
+                            </div>
+                          ) : null}
+                          {field.type === "enum" ? (
+                            <div className="form-group">
+                              <label htmlFor={field.formId}>
+                                {" "}
+                                {field.label}
+                              </label>
+                              <select
+                                className="form-control"
+                                id={field.formId}
+                                name={field.label}
+                                required={
+                                  field.validators.find(
+                                    (z) => z.validatorName === "required"
+                                  )
+                                    ? true
+                                    : false
+                                }
+                              >
+                                {field.values.map((val) => {
+                                  return (
+                                    <option key={val.id} value={val.id}>
+                                      {val.name}
+                                    </option>
+                                  );
+                                })}
+                              </select>
+                            </div>
+                          ) : null}
+                          {/*proveri da li ima greske  */}
+                        </React.Fragment>
+                      );
+                    })}
+                  <button type="submit" className="btn btn-primary">
+                    Submit
+                  </button>
+                </form>
+              </>
+            );
+          })}
       </div>
     );
   }
@@ -376,7 +421,8 @@ const mapStateToProps = (state) => {
   console.log(state);
   return {
     formData: state.form.formData,
-    processInstanceId: state.form.processInstanceId,
+    processInstanceId: state.form.cometeeUsers,
+    cometeeUsers: state.form.cometeeUsers,
   };
 };
 
@@ -384,8 +430,11 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchFormData: (processInstanceId) =>
       dispatch(fetchFormData(processInstanceId)),
+    fetchFormDataCometee: (processInstanceId, taskNameOrId) =>
+      dispatch(fetchFormDataCometee(processInstanceId, taskNameOrId)),
     submitCometeeForm: (formListData, taskId, procInstanceId) =>
       dispatch(submitCometeeForm(formListData, taskId, procInstanceId)),
+    getCometeeUsers: () => dispatch(getCometeeUsers()),
   };
 };
 

@@ -19,7 +19,7 @@ const initState = {
   emailConfirmation: null,
   cometeeRespone: null,
   auth: null,
-  cometeeUsers: [],
+  cometeeUsers: null,
 };
 
 const formReducer = (state = initState, action) => {
@@ -37,7 +37,7 @@ const formReducer = (state = initState, action) => {
     case EMAIL_SUBMIT:
       return { ...state, emailConfirmation: action.payload };
     case GET_COMETEE_USERS:
-      return { ...state, cometeeUsers: [...action.payload] };
+      return { ...state, cometeeUsers: action.payload };
     case LOGIN:
       return { ...state, auth: action.payload };
     case DOC_UPLOAD:
