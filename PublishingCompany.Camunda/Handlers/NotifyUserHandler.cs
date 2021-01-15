@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using Camunda.Worker;
+﻿using Camunda.Worker;
 using Microsoft.AspNetCore.Identity;
 using NETCore.MailKit.Core;
 using PublishingCompany.Camunda.BPMN;
 using PublishingCompany.Camunda.Domain;
-using PublishingCompany.Camunda.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,22 +10,17 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Handlers
 {
-    [HandlerTopics("Topic_UserApprovalHandler", LockDuration = 10_000)]
-    public class UserApprovalHandler : ExternalTaskHandler
+    [HandlerTopics("Topic_NotifyUserHandler", LockDuration = 10_000)]
+    public class NotifyUserHandler : ExternalTaskHandler
     {
         private readonly BpmnService _bpmnService;
         private readonly UserManager<User> _userManager;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
 
-        public UserApprovalHandler(IMapper mapper, IUnitOfWork unitOfWork, IEmailService emailService, BpmnService bpmnService, UserManager<User> userManager)
+        public NotifyUserHandler(IEmailService emailService, BpmnService bpmnService, UserManager<User> _userManager)
         {
-            this._mapper = mapper;
-            this._unitOfWork = unitOfWork;
             this._bpmnService = bpmnService;
             this._emailService = emailService;
-            this._userManager = userManager;
         }
 
         public async override Task<IExecutionResult> Process(ExternalTask externalTask)
@@ -38,9 +31,8 @@ namespace PublishingCompany.Camunda.Handlers
                 //izvuci varijablu
                 var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
                 var user = await _userManager.FindByEmailAsync(userEmail);
-                user.ApprovalStatus = Domain.Enums.ApprovalStatus.Approved;
-                _unitOfWork.Users.Update(user);
-                _unitOfWork.Complete();
+                var link = "http://localhost:3000/upload";
+                await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"<a href=\"{link}\">Go to</a>", true);
             }
             catch (Exception e)
             {

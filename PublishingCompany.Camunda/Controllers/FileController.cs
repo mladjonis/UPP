@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PublishingCompany.Camunda.BPMN;
 using PublishingCompany.Camunda.CQRS.PdfUpload;
 using PublishingCompany.Camunda.Domain;
 using System;
@@ -19,11 +20,13 @@ namespace PublishingCompany.Camunda.Controllers
     {
         private readonly IMediator _mediator;
         private readonly UserManager<User> _userManager;
+        private readonly BpmnService _bpmnService;
 
-        public FileController(IMediator mediator, UserManager<User> userManager)
+        public FileController(IMediator mediator, UserManager<User> userManager, BpmnService bpmnService)
         {
             _userManager = userManager;
             _mediator = mediator;
+            _bpmnService = bpmnService;
         }
 
         [HttpPost("UploadDocuments")]
@@ -31,6 +34,7 @@ namespace PublishingCompany.Camunda.Controllers
         {
             var currentUser = await GetCurrentUserAsync();
             request.User = currentUser;
+            request.ProcessInstanceId = _bpmnService.processInstanceId;
             var response = await _mediator.Send(request);
             return Ok(response);
         }

@@ -47,15 +47,17 @@ namespace PublishingCompany.Camunda.DbConfig
                     Name = "Writer",
                     Lastname = "Writer",
                     Email = "writer@camunda.com",
-                    UserName = "writer"
+                    UserName = "writer",
+                    Files = "https://localhost:44343/docs/writer/doc1.pdf,https://localhost:44343/docs/writer/doc2.pdf"
                 };
 
                 IdentityResult writerResult =  _userManager.CreateAsync(writer, "password123").Result;
                 if (writerResult.Succeeded)
                 {
                     _userManager.AddToRoleAsync(writer, "Writer").Wait();
+                    _bpmnService.CreateUser(new UserProfileInfo() { Email = writer.Email, LastName = writer.Lastname, FirstName = writer.Name, Id = writer.UserName }, "password123").Wait();
                 }
-                _bpmnService.CreateUser(new UserProfileInfo() {Email = writer.Email, LastName = writer.Lastname, FirstName = writer.Name, Id = writer.UserName }, "password123").Wait();
+                
 
                 var admin = new User { UserName = "Admin", Email = "admin@camunda.com", Name="Admin", Lastname="Admin" };
                 IdentityResult result = _userManager.CreateAsync(admin, "password123").Result;

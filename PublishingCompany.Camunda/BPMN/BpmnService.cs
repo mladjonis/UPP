@@ -22,7 +22,7 @@ namespace PublishingCompany.Camunda.BPMN
     {
         private readonly CamundaClient camunda;
         private string processDefinitionId = string.Empty;
-        private string processInstanceId = string.Empty;
+        public string processInstanceId = string.Empty;
 
         public BpmnService(string camundaRestApiUri)
         {
@@ -45,6 +45,7 @@ namespace PublishingCompany.Camunda.BPMN
         //private Regex beginningRegex = new Regex(@"<bpmn:userTask.+>$[\s\W\w.]+</bpmn:userTask>", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
         private Regex beginningRegex = new Regex("<bpmn:userTask.*?</bpmn:userTask>", RegexOptions.Singleline);
         private Regex formFieldManipulation = new Regex(@"<camunda:formField.+>$[\s\S]*?</camunda:formField>", RegexOptions.Multiline);
+        private Regex formFieldWithoutValidation = new Regex(@"<camunda:formField.+/>$", RegexOptions.Multiline);
         private Regex formFieldInfo = new Regex(@"<camunda:formField.+>$", RegexOptions.Multiline);
         private Regex formValidation = new Regex(@"<camunda:validation>[\s\S]*?</camunda:validation>", RegexOptions.Multiline);
         private Regex formValue = new Regex(@"<camunda:value.+/>$", RegexOptions.Multiline);
@@ -67,20 +68,23 @@ namespace PublishingCompany.Camunda.BPMN
             //var taskKrace = taskList.Find(x=>x.Contains(taskKeyDefinitionOrTaskName));
             var userTaskInfo = userTask.Matches(task);
             var formFields = formFieldManipulation.Matches(task);
+            var formFieldsWithoutValdiations = formFieldWithoutValidation.Matches(task);
             var processInstance = await GetProcessInstancesInfo(this.processInstanceId);
+            //f3eea732-52a4-11eb-9f77-e4f89c5bfdff
             var form = new FormFieldsDto(){ProcessDefinitionKey= processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = processInstance.FirstOrDefault().Id};
+            //var form = new FormFieldsDto() { ProcessDefinitionKey = processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = "f3eea732-52a4-11eb-9f77-e4f89c5bfdff" };
             var taskInfo = stringManipulation.Matches(userTaskInfo[0].Value);
             foreach (Match ut in taskInfo)
             {
-                if (ut.Value.Contains("id"))
+                if (ut.Value.Contains("id="))
                 {
                     form.TaskId = ut.Groups[1].Value.Replace("\"", "");
                 }
-                else if (ut.Value.Contains("name"))
+                else if (ut.Value.Contains("name="))
                 {
                     form.TaskName = ut.Groups[1].Value.Replace("\"", "");
                 }
-                else if (ut.Value.Contains("formKey"))
+                else if (ut.Value.Contains("formKey="))
                 {
                     form.FormKey = ut.Groups[1].Value.Replace("\"", "");
                 }
@@ -107,19 +111,98 @@ namespace PublishingCompany.Camunda.BPMN
                 var ffDetails = stringManipulation.Matches(ffInfo[0].Value);
                 foreach (Match fd in ffDetails)
                 {
-                    if (fd.Value.Contains("id"))
+                    if (fd.Value.Contains("id="))
                     {
                         camundaFrom1.FormId = fd.Groups[1].Value.Replace("\"", "");
                     }
-                    else if (fd.Value.Contains("label"))
+                    else if (fd.Value.Contains("label="))
                     {
                         camundaFrom1.Label = fd.Groups[1].Value.Replace("\"", "");
                     }
-                    else if (fd.Value.Contains("type"))
+                    else if (fd.Value.Contains("type="))
                     {
                         camundaFrom1.Type = fd.Groups[1].Value.Replace("\"", "");
                     }
-                    else if (fd.Value.Contains("defaultValue"))
+                    else if (fd.Value.Contains("defaultValue="))
+                    {
+                        camundaFrom1.DefaultValue = fd.Groups[1].Value.Replace("\"", "");
+                    }
+                }
+                var values = formValue.Matches(formFields[i].Value);
+                if (values.Count > 0 && camundaFrom1.Type.Equals("enum"))
+                {
+                    for (int p = 0; p < values.Count; p++)
+                    {
+                        var valuesDetails = stringManipulation.Matches(values[p].Value);
+                        FormFieldValues formVal = new FormFieldValues();
+                        for (int k = 0; k < valuesDetails.Count; k++)
+                        {
+                            if (valuesDetails[k].Value.Contains("id="))
+                            {
+                                formVal.Id = valuesDetails[k].Groups[1].Value.Replace("\"", "");
+                                continue;
+                            }
+                            else if (valuesDetails[k].Value.Contains("label="))
+                            {
+                                formVal.Label = valuesDetails[k].Groups[1].Value.Replace("\"", "");
+                                continue;
+                            }
+                            else if (valuesDetails[k].Value.Contains("name="))
+                            {
+                                formVal.Name = valuesDetails[k].Groups[1].Value.Replace("\"", "");
+                                continue;
+                            }
+                        }
+                        camundaFrom1.Values.Add(formVal);
+                    }
+                }
+                var val = formValidation.Matches(formFields[i].Value);
+                if (val.Count > 0)
+                {
+                    var valDetails = stringManipulation.Matches(val[0].Value);
+                    for (int j = 0; j < valDetails.Count; j++)
+                    {
+                        FormFieldValidator ffv = new FormFieldValidator();
+                        if (valDetails[j].Value.Contains("config")) continue;
+                        if (valDetails[j].Value.Contains("required") || valDetails[j].Value.Contains("readonly"))
+                        {
+                            ffv.ValidatorName = valDetails[j].Groups[1].Value.Replace("\"", "");
+                            camundaFrom1.Validators.Add(ffv);
+                            continue;
+                        }
+                        else if (valDetails[j].Value.Contains("minlength") || valDetails[j].Value.Contains("maxlength") || valDetails[j].Value.Contains("min") || valDetails[j].Value.Contains("max"))
+                        {
+                            ffv.ValidatorName = valDetails[j].Groups[1].Value.Replace("\"", "");
+                            ffv.ValidatorConfig = valDetails[j + 1].Groups[1].Value.Replace("\"", "");
+                            camundaFrom1.Validators.Add(ffv);
+                            continue;
+                        }
+                    }
+                }
+            form.CamundaFormFields.Add(camundaFrom1);
+            }
+
+            //bez valdiacije isti process
+            for (int i = 0; i < formFieldsWithoutValdiations.Count; i++)
+            {
+                var camundaFrom1 = new CamundaFormField();
+                var ffInfo = formFieldWithoutValidation.Matches(formFieldsWithoutValdiations[i].Value);
+                var ffDetails = stringManipulation.Matches(ffInfo[0].Value);
+                foreach (Match fd in ffDetails)
+                {
+                    if (fd.Value.Contains("id="))
+                    {
+                        camundaFrom1.FormId = fd.Groups[1].Value.Replace("\"", "");
+                    }
+                    else if (fd.Value.Contains("label="))
+                    {
+                        camundaFrom1.Label = fd.Groups[1].Value.Replace("\"", "");
+                    }
+                    else if (fd.Value.Contains("type="))
+                    {
+                        camundaFrom1.Type = fd.Groups[1].Value.Replace("\"", "");
+                    }
+                    else if (fd.Value.Contains("defaultValue="))
                     {
                         camundaFrom1.DefaultValue = fd.Groups[1].Value.Replace("\"", "");
                     }
@@ -175,7 +258,7 @@ namespace PublishingCompany.Camunda.BPMN
                         }
                     }
                 }
-            form.CamundaFormFields.Add(camundaFrom1);
+                form.CamundaFormFields.Add(camundaFrom1);
             }
             return form;
         }
@@ -440,23 +523,23 @@ namespace PublishingCompany.Camunda.BPMN
         /// <returns> Process definition Id</returns>
         public async Task<string> StartWriterRegistrationProcess(IList<User> cometee)
         {
-            var processInstance = new StartProcessInstance().SetVariable("validation", false).SetVariable("cometees", cometee);
-            //proba
-            //var form = new FormInfo().Key;
-            //var startForm = new SubmitStartForm().SetVariable("username", "asa");
-            //var asa = await camunda.UserTasks.Query(new TaskQuery()).List();
-
-
+            var processInstance = new StartProcessInstance().SetVariable("validation", false)
+                .SetVariable("cometees", cometee)
+                .SetVariable("documentCountRequired", false);
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();
-
-
-            //namestiti kada se zavrse modeli da vrati clanove komisije koji ce ici u model
-            //var comitee = _unitOfWork.Users.GetAll().ToList();
-            //stara podesavanja vratiti kada se istestira 
-            //var processStartResult = await
-            //    camunda.ProcessDefinitions.ByKey("Process_Writer_Registration").StartProcessInstance(processInstance);
             processDefinitionId = "Process_Writer_Registration1";
+            var processStartResult = await
+                camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
+            return processStartResult.Id;
+        }
+
+        public async Task<string> StartReaderRegistrationProcess()
+        {
+            var processInstance = new StartProcessInstance().SetVariable("validation", false);
+            //ako bude trebao businessKey
+            //processParams.BusinessKey = user.Id.ToString();
+            processDefinitionId = "Process_Reader_Registration";
             var processStartResult = await
                 camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;
