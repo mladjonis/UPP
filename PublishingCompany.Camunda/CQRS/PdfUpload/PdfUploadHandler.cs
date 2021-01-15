@@ -53,9 +53,9 @@ namespace PublishingCompany.Camunda.CQRS.PdfUpload
                 _unitOfWork.Complete();
 
                 var task = await _bpmnService.GetFirstTask(request.ProcessInstanceId);
+                await _bpmnService.SetProcessVariableByProcessInstanceId("documentCountRequired", request.ProcessInstanceId, true);
                 await _bpmnService.ClaimTask(task.Id, user.UserName);
                 await _bpmnService.CompleteTask(task.Id);
-                await _bpmnService.SetProcessVariableByProcessInstanceId("documentCountRequired", request.ProcessInstanceId, true);
                 response.Status = "Uploaded successfully";
             }
             catch(Exception e)

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PublishingCompany.Camunda.BPMN;
+using PublishingCompany.Camunda.CQRS.CometeeFormData;
 using PublishingCompany.Camunda.CQRS.CometeeProcessing;
 using PublishingCompany.Camunda.CQRS.GetDormData;
 using PublishingCompany.Camunda.Domain;
@@ -34,14 +35,16 @@ namespace PublishingCompany.Camunda.Controllers
         }
 
         [HttpGet("GetUsersToApprove")]
-        public ActionResult<IEnumerable<User>> GetUsersToApprove()
+        public async Task<ActionResult> GetUsersToApprove()
         {
-            var users = _unitOfWork.Users.Find(u => u.ApprovalStatus != Domain.Enums.ApprovalStatus.Approved && u.ApprovalStatus != Domain.Enums.ApprovalStatus.Rejected);
-            return Ok(users);
+            var procInstId = _bpmnService.processInstanceId;
+            var users = await _userManager.GetUsersInRoleAsync("Writer");
+            users = users.Where(u => u.ApprovalStatus != Domain.Enums.ApprovalStatus.Approved && u.ApprovalStatus != Domain.Enums.ApprovalStatus.Rejected).ToList();
+            return Ok(new { processInstanceId = procInstId, users = users });
         }
 
         [HttpGet("GetFormData")]
-        public async Task<ActionResult> Get([FromQuery] GetFormDataRequest request)
+        public async Task<ActionResult> Get([FromQuery] CometeeFormDataRequest request)
         {
             var response = await _mediator.Send(request);
             return Ok(response);
