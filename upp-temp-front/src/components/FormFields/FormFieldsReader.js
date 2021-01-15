@@ -1,7 +1,6 @@
 import React, { Component } from "react";
+import FormFields from "./FormFields";
 
-export default class FormFieldsReader extends Component {
-  render() {
-    return <div>FormFieldsReader</div>;
-  }
-}
+export const FormFieldsReader = () => {
+  return <FormFields />;
+};

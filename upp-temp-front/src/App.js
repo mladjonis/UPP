@@ -7,22 +7,22 @@ import Navbar from "./components/navbar/Navbar";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import FileUpload from "./components/file-upload/FileUpload";
 import DecisionsDetails from "./components/cometee/DecisionsDetails";
+import Payment from "./components/payment/Payment";
 
 function App() {
   return (
-    <BrowserRouter>
-      <React.Fragment>
-        <Navbar />
-        <Switch>
-          <Route path="/" exact component={Home} />
-          <Route path="/login" component={Login} />
-          <Route path="/registration" component={Registration} />
-          <Route path="/email-confirmation" component={EmailConfirmation} />
-          <Route path="/upload" component={FileUpload} />
-          <Route path="/cometee" component={DecisionsDetails} />
-        </Switch>
-      </React.Fragment>
-    </BrowserRouter>
+    <React.Fragment>
+      <Navbar />
+      <Switch>
+        <Route path="/" exact component={Home} />
+        <Route path="/login" component={Login} />
+        <Route path="/registration" component={Registration} />
+        <Route path="/email-confirmation" component={EmailConfirmation} />
+        <Route path="/upload" component={FileUpload} />
+        <Route path="/cometee" component={DecisionsDetails} />
+        <Route path="/payment" component={Payment} />
+      </Switch>
+    </React.Fragment>
   );
 }
 

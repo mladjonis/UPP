@@ -9,7 +9,7 @@ class EmailConfirmation extends React.Component {
 
   componentDidMount() {
     let urlSearchParams = new URLSearchParams(this.props.location.search);
-    if (!urlSearchParams) {
+    if (urlSearchParams) {
       let userId = urlSearchParams.get("userId");
       let token = urlSearchParams.get("token");
       let procInstId = urlSearchParams.get("processInstanceId");
