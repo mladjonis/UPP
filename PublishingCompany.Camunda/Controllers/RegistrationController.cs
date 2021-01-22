@@ -46,10 +46,16 @@ namespace PublishingCompany.Camunda.Controllers
 
         //treba ubaciti u cqrs ako se hoce ispostovati do kraja sve ali samo zbog jedne linije..
         [HttpGet("StartWriterProcess")]
-        public async Task<ActionResult<string>> StartProcessAsync()
+        public async Task<ActionResult<string>> StartWriterProcess()
         {
             var cometee = await _userManager.GetUsersInRoleAsync("Cometee");
             return Ok(await _bpmnService.StartWriterRegistrationProcess(cometee));
+        }
+
+        [HttpGet("StartReaderProcess")]
+        public async Task<ActionResult<string>> StartReaderProccess()
+        {
+            return Ok(await _bpmnService.StartReaderRegistrationProcess());
         }
 
         [HttpGet("GetFormData")]
@@ -97,7 +103,7 @@ namespace PublishingCompany.Camunda.Controllers
             }
         }
 
-        [HttpGet("Logout")]
+        [HttpPost("Logout")]
         public async Task Logout()
         {
             await _signInManager.SignOutAsync();

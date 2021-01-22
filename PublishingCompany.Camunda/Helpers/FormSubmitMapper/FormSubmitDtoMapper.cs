@@ -110,7 +110,29 @@ namespace PublishingCompany.Camunda.Helpers.FormSubmitMapper
                 {
                     userDto.Password = (string)data.FieldValue;
                 }
+                if (data.FieldId.Equals("beta_reader"))
+                {
+                    userDto.BetaReader = (string)data.FieldValue;
+                }
                 else if (data.FieldId.Equals("genres"))
+                {
+                    var split = data.FieldValue.ToString().Split(',');
+                    //// -1 zbog zadnjeg , ipak nce trebati -1 sredjeno na frontu fino sve
+                    for (int i = 0; i < split.Length; i++)
+                    {
+                        //gadno je ali me mrzilo da uradim ljepse.. ovo cu da ubacim u repo da trazi po imenu
+                        if (genres.Find(x => x.Name.ToLower().Equals(split[i])) == null)
+                        {
+                            _unitOfWork.Genres.Add(new Genre() { Name = split[i] });
+                            _unitOfWork.Complete();
+                        }
+                        else
+                        {
+                            userDto.Genres.Add(genres.Where(g => g.Name.ToLower().Equals(split[i])).FirstOrDefault());
+                        }
+                    }
+                }
+                else if (data.FieldId.Equals("beta_reader_genres"))
                 {
                     var split = data.FieldValue.ToString().Split(',');
                     //// -1 zbog zadnjeg , ipak nce trebati -1 sredjeno na frontu fino sve

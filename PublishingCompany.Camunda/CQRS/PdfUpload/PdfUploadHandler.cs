@@ -30,23 +30,23 @@ namespace PublishingCompany.Camunda.CQRS.PdfUpload
             PdfUploadResponse response = new PdfUploadResponse();
             try
             {
+                var processInstanceResource = _bpmnService.GetProcessInstanceResource(request.ProcessInstanceId);
+                var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
+                var user = _unitOfWork.Users.GetUserByEmail(userEmail);
+
                 var docPath = Path.GetFullPath("docs");
-                string userPath = Path.Combine(docPath,$"{request.User.Name}{request.User.Lastname}");
+                string userPath = Path.Combine(docPath, $"{user.UserName}");
                 if (!Directory.Exists(userPath))
                 {
                     Directory.CreateDirectory(userPath);
                 }
-
-                var processInstanceResource = _bpmnService.GetProcessInstanceResource(request.ProcessInstanceId);
-                var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
-                var user = _unitOfWork.Users.GetUserByEmail(userEmail);
 
                 foreach (var file in request.FormFiles)
                 {
                     using (FileStream stream = new FileStream(Path.Combine(userPath,file.FileName), FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
-                        user.Files += "https://localhost:44341/docs/" + $"{user.UserName}/" + $"{file.FileName},";
+                        user.Files += "https://localhost:44343/docs/" + $"{user.UserName}/" + $"{file.FileName},";
                     }
                 }
                 _unitOfWork.Users.Update(user);
