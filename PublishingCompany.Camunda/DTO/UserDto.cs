@@ -15,6 +15,8 @@ namespace PublishingCompany.Camunda.DTO
         public string State { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string BetaReader { get; set; } = null;
         public List<Genre> Genres { get; set; } = new List<Genre>();
+        public List<Genre> BetaReaderGenres { get; set; } = new List<Genre>();
     }
 }

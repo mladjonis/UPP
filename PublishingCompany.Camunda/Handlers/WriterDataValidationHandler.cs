@@ -33,79 +33,88 @@ namespace PublishingCompany.Camunda.Handlers
             this._bpmnService = bpmnService;
             this._dtoMapper = dtoMapper;
             this._userManager = userManager;
+            
         }
 
 
         public async override Task<IExecutionResult> Process(ExternalTask externalTask)
         {
-            try
+            if (externalTask.Retries == null)
             {
-                //deserializacija vrednosti koje su potrebne za serijalizaciju na workeru
-                var processInstanceResource = _bpmnService.GetProcessInstanceResource(externalTask.ProcessInstanceId);
-                var registrationValues = await processInstanceResource.Variables.Get("registrationValues");
-                var jArrayValue = (Newtonsoft.Json.Linq.JArray)registrationValues.Value;
-                var submittedData = jArrayValue.ToObject<List<FormSubmitDto>>();
-                //postoji ovde caka sada kada se bude mapiralo na usera kastuj podatke kako?
-                //mapiraj submitovane podatke na usera
-                var userDto = _dtoMapper.MapFormDataToUserDto(submittedData);
-                var user = _mapper.Map<User>(userDto);
-
-                var userProfile = _mapper.Map<UserProfileInfo>(user);
-
-                //izvrsi validaciju i ovde mozda mada prilikom submitovanja forme se vec vrsi validacija i puca ako nije dobro nesto tako da je mozda nepotrebno
-
-                //proveri da li korisnik sa tim emailom postoji u bazi vec
-                var userExist = _unitOfWork.Users.GetUserByEmail(userDto.Email);
-                var userNameExists = _unitOfWork.Users.Find(x => x.UserName.Equals(userDto.Username)).ToList().FirstOrDefault();
-                if (userExist != null && userNameExists != null)
-                {
-                    //    //postavi procesnu varijablu validacija na false jer valdiacija nije prosla - vec je postavljena u bpmnService klasi
-                    return new CompleteResult()
-                    {
-                        Variables = new Dictionary<string, Variable>
-                        {
-                            ["WriterValidationError"] = new Variable("User already exists", VariableType.String)
-                        }
-                    };
-                }
-                //ako ne postoji dodaj korisnika u bazu i u camundinu bazu da bi kasnije mogao da claimuje usertaskove koji se claimuju a ne kao forma automatski
-                var registrationResult = await _userManager.CreateAsync(user, userDto.Password);
-                if (!registrationResult.Succeeded)
-                {
-                    return new CompleteResult()
-                    {
-                        Variables = new Dictionary<string, Variable>
-                        {
-                            ["WriterValidationError"] = new Variable(registrationResult.Errors, VariableType.Object)
-                        }
-                    };
-                }
-                var userRole = await _userManager.AddToRoleAsync(user, "Writer");
-                if (!userRole.Succeeded)
-                {
-                    return new CompleteResult()
-                    {
-                        Variables = new Dictionary<string, Variable>
-                        {
-                            ["WriterValidationError"] = new Variable(userRole.Errors, VariableType.Object)
-                        }
-                    };
-                }
-                await _bpmnService.CreateUser(userProfile, userDto.Password);
-                await _bpmnService.SetProcessVariableByProcessInstanceId("validation", externalTask.ProcessInstanceId, true);
-                // postavi varijablu za email da bi se u sledecem procesu moglo pristupiti i da bi se znalo generisati token na osnovu cega
-                await _bpmnService.SetProcessVariableByProcessInstanceId("userEmail", externalTask.ProcessInstanceId, user.Email);
-
+                externalTask.Retries = 3;
             }
-            catch(Exception e)
+            else
             {
-                return new CompleteResult()
+                externalTask.Retries -= 1;
+                try
                 {
-                    Variables = new Dictionary<string, Variable>
+                    //deserializacija vrednosti koje su potrebne za serijalizaciju na workeru
+                    var processInstanceResource = _bpmnService.GetProcessInstanceResource(externalTask.ProcessInstanceId);
+                    var registrationValues = await processInstanceResource.Variables.Get("registrationValues");
+                    var jArrayValue = (Newtonsoft.Json.Linq.JArray)registrationValues.Value;
+                    var submittedData = jArrayValue.ToObject<List<FormSubmitDto>>();
+                    //postoji ovde caka sada kada se bude mapiralo na usera kastuj podatke kako?
+                    //mapiraj submitovane podatke na usera
+                    var userDto = _dtoMapper.MapFormDataToUserDto(submittedData);
+                    var user = _mapper.Map<User>(userDto);
+
+                    var userProfile = _mapper.Map<UserProfileInfo>(user);
+
+                    //izvrsi validaciju i ovde mozda mada prilikom submitovanja forme se vec vrsi validacija i puca ako nije dobro nesto tako da je mozda nepotrebno
+
+                    //proveri da li korisnik sa tim emailom postoji u bazi vec
+                    var userExist = _unitOfWork.Users.GetUserByEmail(userDto.Email);
+                    var userNameExists = _unitOfWork.Users.Find(x => x.UserName.Equals(userDto.Username)).ToList().FirstOrDefault();
+                    if (userExist != null && userNameExists != null)
                     {
-                        ["WriterValidationError"] = new Variable(e.Message, VariableType.String)
+                        //    //postavi procesnu varijablu validacija na false jer valdiacija nije prosla - vec je postavljena u bpmnService klasi
+                        return new CompleteResult()
+                        {
+                            Variables = new Dictionary<string, Variable>
+                            {
+                                ["WriterValidationError"] = new Variable("User already exists", VariableType.String)
+                            }
+                        };
                     }
-                };
+                    //ako ne postoji dodaj korisnika u bazu i u camundinu bazu da bi kasnije mogao da claimuje usertaskove koji se claimuju a ne kao forma automatski
+                    var registrationResult = await _userManager.CreateAsync(user, userDto.Password);
+                    if (!registrationResult.Succeeded)
+                    {
+                        return new CompleteResult()
+                        {
+                            Variables = new Dictionary<string, Variable>
+                            {
+                                ["WriterValidationError"] = new Variable(registrationResult.Errors, VariableType.Object)
+                            }
+                        };
+                    }
+                    var userRole = await _userManager.AddToRoleAsync(user, "Writer");
+                    if (!userRole.Succeeded)
+                    {
+                        return new CompleteResult()
+                        {
+                            Variables = new Dictionary<string, Variable>
+                            {
+                                ["WriterValidationError"] = new Variable(userRole.Errors, VariableType.Object)
+                            }
+                        };
+                    }
+                    await _bpmnService.CreateUser(userProfile, userDto.Password);
+                    await _bpmnService.SetProcessVariableByProcessInstanceId("validation", externalTask.ProcessInstanceId, true);
+                    // postavi varijablu za email da bi se u sledecem procesu moglo pristupiti i da bi se znalo generisati token na osnovu cega
+                    await _bpmnService.SetProcessVariableByProcessInstanceId("userEmail", externalTask.ProcessInstanceId, user.Email);
+
+                }
+                catch (Exception e)
+                {
+                    return new CompleteResult()
+                    {
+                        Variables = new Dictionary<string, Variable>
+                        {
+                            ["WriterValidationError"] = new Variable(e.Message, VariableType.String)
+                        }
+                    };
+                }
             }
 
             return new CompleteResult() {

@@ -70,7 +70,6 @@ namespace PublishingCompany.Camunda.BPMN
             var formFields = formFieldManipulation.Matches(task);
             var formFieldsWithoutValdiations = formFieldWithoutValidation.Matches(task);
             var processInstance = await GetProcessInstancesInfo(this.processInstanceId);
-            //f3eea732-52a4-11eb-9f77-e4f89c5bfdff
             var form = new FormFieldsDto(){ProcessDefinitionKey= processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = processInstance.FirstOrDefault().Id};
             //var form = new FormFieldsDto() { ProcessDefinitionKey = processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = "f3eea732-52a4-11eb-9f77-e4f89c5bfdff" };
             var taskInfo = stringManipulation.Matches(userTaskInfo[0].Value);
@@ -528,7 +527,7 @@ namespace PublishingCompany.Camunda.BPMN
                 .SetVariable("documentCountRequired", false);
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();
-            processDefinitionId = "Process_Writer_Registration1";
+            processDefinitionId = "Process_Writer_Registration";
             var processStartResult = await
                 camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;

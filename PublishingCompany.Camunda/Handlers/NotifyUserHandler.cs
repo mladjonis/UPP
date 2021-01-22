@@ -17,10 +17,11 @@ namespace PublishingCompany.Camunda.Handlers
         private readonly UserManager<User> _userManager;
         private readonly IEmailService _emailService;
 
-        public NotifyUserHandler(IEmailService emailService, BpmnService bpmnService, UserManager<User> _userManager)
+        public NotifyUserHandler(IEmailService emailService, BpmnService bpmnService, UserManager<User> userManager)
         {
             this._bpmnService = bpmnService;
             this._emailService = emailService;
+            this._userManager = userManager;
         }
 
         public async override Task<IExecutionResult> Process(ExternalTask externalTask)
@@ -31,8 +32,15 @@ namespace PublishingCompany.Camunda.Handlers
                 //izvuci varijablu
                 var userEmail = processInstanceResource.Variables.Get("userEmail").Result.GetValue<string>();
                 var user = await _userManager.FindByEmailAsync(userEmail);
-                var link = "http://localhost:3000/upload";
-                await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"<a href=\"{link}\">Go to</a>", true);
+                if (externalTask.Variables["message"].Value.ToString().Contains("material"))
+                {
+                    var link = "http://localhost:3000/upload-more";
+                    await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"<a href=\"{link}\">Go to</a>", true);
+                }
+                else
+                {
+                    await _emailService.SendAsync(userEmail, $"Notify user", $"{externalTask.Variables["message"].Value}");
+                }
             }
             catch (Exception e)
             {

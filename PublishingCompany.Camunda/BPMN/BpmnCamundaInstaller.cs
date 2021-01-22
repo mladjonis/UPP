@@ -18,12 +18,13 @@ namespace PublishingCompany.Camunda.BPMN
             services.AddCamundaWorker(options =>
             {
                 options.BaseUri = new Uri(camundaRestApiUri);
-                options.WorkerCount = 4;
+                options.WorkerCount = 5;
             })
             .AddHandler<WriterDataValidationHandler>()
             .AddHandler<RegistrationEmailSendHandler>()
             .AddHandler<NotifyUserHandler>()
-            .AddHandler<RegistrationFinishHandler>();
+            .AddHandler<RegistrationFinishHandler>()
+            .AddHandler<UserApprovalHandler>();
 
             return services;
         }
