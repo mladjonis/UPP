@@ -11,6 +11,7 @@ import {
   EMAIL_SUBMIT,
   DOC_UPLOAD,
   GET_COMETEE_USERS,
+  FETCH_BETA_FORM_DATA,
 } from "./types";
 import { registrationApi } from "../apis/registration";
 import { genresApi } from "../apis/genres";
@@ -45,6 +46,21 @@ export const submitWriterForm = (
   history.push("/");
 };
 
+export const submitReaderForm = (
+  formListData,
+  taskId,
+  procInstanceId
+) => async (dispatch) => {
+  const response = await registrationApi.post("/RegisterUser", {
+    SubmitFields: formListData,
+    TaskId: taskId,
+    ProcessInstanceId: procInstanceId,
+  });
+  console.log(response);
+  dispatch({ type: SUBMIT_FORM_DATA, payload: response.data });
+  history.push("/");
+};
+
 export const getGenres = () => async (dispatch) => {
   const response = await genresApi.get("/GetAll");
 
@@ -53,6 +69,11 @@ export const getGenres = () => async (dispatch) => {
 
 export const startWriterProcess = () => async (dispatch) => {
   const response = await registrationApi.get("/StartWriterProcess");
+  dispatch({ type: START_PROCESS, payload: response.data });
+};
+
+export const startReaderProcess = () => async (dispatch) => {
+  const response = await registrationApi.get("/StartReaderProcess");
   dispatch({ type: START_PROCESS, payload: response.data });
 };
 
@@ -94,7 +115,7 @@ export const logout = () => async (dispatch) => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   history.push("/");
-  await registrationApi.get("/Logout");
+  await registrationApi.post("/Logout");
 };
 
 export const uploadDocuments = (documents, procId) => async (dispatch) => {
@@ -136,7 +157,19 @@ export const fetchFormDataCometee = (procId, taskNameOrId) => async (
       TaskNameOrId: taskNameOrId,
     },
   });
-  dispatch({ type: FETCH_FORM_DATA, payload: response.data });
+  dispatch({ type: FETCH_BETA_FORM_DATA, payload: response.data });
+};
+
+export const fetchBetaReadersFormData = (procId, taskNameOrId) => async (
+  dispatch
+) => {
+  const response = await registrationApi.get("/GetGenresFormData", {
+    params: {
+      ProcessInstanceId: procId,
+      TaskNameOrId: taskNameOrId,
+    },
+  });
+  dispatch({ type: FETCH_BETA_FORM_DATA, payload: response.data });
 };
 
 export const dummy = () => async (dispatch) => {
