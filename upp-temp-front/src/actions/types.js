@@ -11,3 +11,4 @@ export const START_PROCESS = "START_PROCESS";
 export const EMAIL_SUBMIT = "EMAIL_SUBMIT";
 export const LOGIN = "LOGIN";
 export const DOC_UPLOAD = "DOC_UPLOAD";
+export const FETCH_BETA_FORM_DATA = "FETCH_BETA_FORM_DATA";

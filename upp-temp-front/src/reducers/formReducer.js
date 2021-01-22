@@ -9,6 +9,7 @@ import {
   DOC_UPLOAD,
   SUBMIT_COMETEE_FORM_DATA,
   GET_COMETEE_USERS,
+  FETCH_BETA_FORM_DATA,
 } from "../actions/types";
 
 const initState = {
@@ -20,6 +21,7 @@ const initState = {
   cometeeRespone: null,
   auth: null,
   cometeeUsers: null,
+  beta: null,
 };
 
 const formReducer = (state = initState, action) => {
@@ -40,6 +42,8 @@ const formReducer = (state = initState, action) => {
       return { ...state, cometeeUsers: action.payload };
     case LOGIN:
       return { ...state, auth: action.payload };
+    case FETCH_BETA_FORM_DATA:
+      return { ...state, beta: action.payload };
     case DOC_UPLOAD:
       return state;
     default:

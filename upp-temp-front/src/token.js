@@ -14,22 +14,27 @@ export const isExpired = (token) => {
 };
 
 export const getRole = (role) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  console.log();
-  console.log(user.userRoles);
-  console.log(user["userRoles"]);
-  const userRole = user["userRoles"].find((x) => x.role.name === role);
-  return userRole;
+  let user = localStorage.getItem("user");
+  if (user) {
+    user = JSON.parse(user);
+    const userRole = user["userRoles"].find((x) => x.role.name === role);
+    return userRole;
+  }
+  return null;
 };
 
 export const getToken = () => {
-  const token = JSON.parse(localStorage.getItem("token"));
-  if (!isExpired(token)) {
+  const token = localStorage.getItem("token");
+  if (token && !isExpired(token)) {
     return token;
   }
   return null;
 };
 
 export const getUser = () => {
-  return JSON.parse(localStorage.getItem("user"));
+  const user = localStorage.getItem("user");
+  if (user) {
+    return JSON.parse(user);
+  }
+  return null;
 };

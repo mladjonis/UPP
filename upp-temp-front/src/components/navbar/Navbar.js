@@ -39,6 +39,24 @@ const Navbar = (props) => {
             </NavLink>
           </React.Fragment>
         );
+      } else if (getUser() && getRole("Cometee")) {
+        return (
+          <React.Fragment>
+            <NavLink className="nav-item nav-link" to="/">
+              Welocome {getUser().userName}
+            </NavLink>
+            <NavLink className="nav-item nav-link" to="/cometee">
+              Go to cometee tab
+            </NavLink>
+            <NavLink
+              className="nav-item nav-link"
+              to="/"
+              onClick={props.logout}
+            >
+              Logout
+            </NavLink>
+          </React.Fragment>
+        );
       }
     }
   };
