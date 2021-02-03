@@ -185,8 +185,7 @@ class DecisionsDetails extends React.Component {
                               />
                             </div>
                           ) : null}
-                          {field.type === "string" &&
-                          field.formId === "genres" ? (
+                          {field.type === "string" && field.defaultValue ? (
                             <div className="form-group">
                               <label htmlFor={field.formId}>
                                 {" "}
@@ -216,7 +215,6 @@ class DecisionsDetails extends React.Component {
                             </div>
                           ) : null}
                           {field.type === "string" &&
-                          field.formId !== "genres" &&
                           field.formId === "password" ? (
                             <div className="form-group">
                               <label htmlFor={field.formId}>
@@ -268,9 +266,9 @@ class DecisionsDetails extends React.Component {
                             </div>
                           ) : null}
                           {field.type === "string" &&
-                          field.formId !== "genres" &&
                           field.formId !== "password" &&
-                          field.formId !== "email" ? (
+                          field.formId !== "email" &&
+                          !field.defaultValue ? (
                             <div className="form-group">
                               <label htmlFor={field.formId}>
                                 {" "}
@@ -321,7 +319,6 @@ class DecisionsDetails extends React.Component {
                             </div>
                           ) : null}
                           {field.type === "string" &&
-                          field.formId !== "genres" &&
                           field.formId !== "password" &&
                           field.formId === "email" ? (
                             <div className="form-group">

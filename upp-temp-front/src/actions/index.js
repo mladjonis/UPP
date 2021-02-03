@@ -61,6 +61,32 @@ export const submitReaderForm = (
   history.push("/");
 };
 
+export const submitReaderForm2 = (
+  formListData,
+  taskId,
+  procInstanceId
+) => async (dispatch) => {
+  const response = await registrationApi.post("/RegisterReader", {
+    SubmitFields: formListData,
+    TaskId: taskId,
+    ProcessInstanceId: procInstanceId,
+  });
+  dispatch({ type: SUBMIT_FORM_DATA, payload: response.data });
+};
+
+export const submitBetaReaderForm = (
+  formListData,
+  taskId,
+  procInstanceId
+) => async (dispatch) => {
+  const response = await registrationApi.post("/RegisterBetaReader", {
+    SubmitFields: formListData,
+    TaskId: taskId,
+    ProcessInstanceId: procInstanceId,
+  });
+  dispatch({ type: SUBMIT_FORM_DATA, payload: response.data });
+};
+
 export const getGenres = () => async (dispatch) => {
   const response = await genresApi.get("/GetAll");
 

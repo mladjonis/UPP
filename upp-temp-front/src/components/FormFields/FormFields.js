@@ -97,7 +97,7 @@ class FormFields extends React.Component {
     console.log(genresList);
     console.log(cometeeList);
     if (genresList.length > 0) {
-      let l2 = [{ FieldId: "genres", FieldValue: genresList.join(",") }];
+      let l2 = [{ FieldId: "genres_", FieldValue: genresList.join(",") }];
       await this.setStateAsync({ genreRequirement: true });
       console.log(this.state);
       return [...sendingList, ...l2];
@@ -192,7 +192,7 @@ class FormFields extends React.Component {
                       />
                     </div>
                   ) : null}
-                  {field.type === "string" && field.formId === "genres" ? (
+                  {field.type === "string" && field.defaultValue ? (
                     <div className="form-group">
                       <label htmlFor={field.formId}> {field.label}</label>
                       <select
@@ -218,9 +218,7 @@ class FormFields extends React.Component {
                       </select>
                     </div>
                   ) : null}
-                  {field.type === "string" &&
-                  field.formId !== "genres" &&
-                  field.formId === "password" ? (
+                  {field.type === "string" && field.formId === "password" ? (
                     <div className="form-group">
                       <label htmlFor={field.formId}> {field.label}</label>
                       <input
@@ -268,9 +266,9 @@ class FormFields extends React.Component {
                     </div>
                   ) : null}
                   {field.type === "string" &&
-                  field.formId !== "genres" &&
                   field.formId !== "password" &&
-                  field.formId !== "email" ? (
+                  field.formId !== "email" &&
+                  !field.defaultValue ? (
                     <div className="form-group">
                       <label htmlFor={field.formId}> {field.label}</label>
                       <input
@@ -318,7 +316,6 @@ class FormFields extends React.Component {
                     </div>
                   ) : null}
                   {field.type === "string" &&
-                  field.formId !== "genres" &&
                   field.formId !== "password" &&
                   field.formId === "email" ? (
                     <div className="form-group">
@@ -384,7 +381,7 @@ class FormFields extends React.Component {
                       >
                         {field.values.map((val) => {
                           return (
-                            <option key={val.id} value={val.name}>
+                            <option key={val.id} value={val.id}>
                               {val.name}
                             </option>
                           );
