@@ -72,6 +72,7 @@ namespace PublishingCompany.Camunda.Helpers.FormSubmitMapper
         public UserDto MapFormDataToUserDto(List<FormSubmitDto> submitDtos)
         {
             var genres = _unitOfWork.Genres.GetAll().ToList();
+            var betaGenres = _unitOfWork.BetaGenres.GetAll().ToList();
             UserDto userDto = new UserDto();
             foreach (var data in submitDtos)
             {
@@ -114,7 +115,7 @@ namespace PublishingCompany.Camunda.Helpers.FormSubmitMapper
                 {
                     userDto.BetaReader = (string)data.FieldValue;
                 }
-                else if (data.FieldId.Equals("genres"))
+                else if (data.FieldId.Equals("genres_"))
                 {
                     var split = data.FieldValue.ToString().Split(',');
                     //// -1 zbog zadnjeg , ipak nce trebati -1 sredjeno na frontu fino sve
@@ -141,12 +142,12 @@ namespace PublishingCompany.Camunda.Helpers.FormSubmitMapper
                         //gadno je ali me mrzilo da uradim ljepse.. ovo cu da ubacim u repo da trazi po imenu
                         if (genres.Find(x => x.Name.ToLower().Equals(split[i])) == null)
                         {
-                            _unitOfWork.Genres.Add(new Genre() { Name = split[i] });
+                            _unitOfWork.BetaGenres.Add(new BetaGenre() { Name = split[i] });
                             _unitOfWork.Complete();
                         }
                         else
                         {
-                            userDto.Genres.Add(genres.Where(g => g.Name.ToLower().Equals(split[i])).FirstOrDefault());
+                            userDto.BetaReaderGenres.Add(betaGenres.Where(g => g.Name.ToLower().Equals(split[i])).FirstOrDefault());
                         }
                     }
                 }

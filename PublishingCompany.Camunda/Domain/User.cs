@@ -20,6 +20,6 @@ namespace PublishingCompany.Camunda.Domain
         public List<CometeeComment> CometeeComments { get; set; }
         public List<UserRole> UserRoles { get; set; }
         public List<Genre> Genres { get; set; }
-        public List<Genre> BetaGenres { get; set; } = new List<Genre>();
+        public List<BetaGenre> BetaGenres { get; set; } = new List<BetaGenre>();
     }
 }

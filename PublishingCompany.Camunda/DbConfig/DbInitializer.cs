@@ -34,7 +34,9 @@ namespace PublishingCompany.Camunda.DbConfig
                     new Role() {Name = "Writer"},
                     new Role() {Name = "Cometee"},
                     new Role() {Name = "Reader"},
-                    new Role() {Name = "BetaReader"}
+                    new Role() {Name = "BetaReader"},
+                    new Role() {Name = "Editor"},
+                    new Role() {Name = "MainEditor"}
                 };
 
                 foreach (var role in roles)

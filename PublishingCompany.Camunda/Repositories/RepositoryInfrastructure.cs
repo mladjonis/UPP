@@ -15,6 +15,7 @@ namespace PublishingCompany.Camunda.Repositories
         {
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IGenreRepository, GenreRepository>();
+            services.AddTransient<IBetaRepository, BetaRepository>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             return services;
         }

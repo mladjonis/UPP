@@ -20,7 +20,7 @@ namespace PublishingCompany.Camunda.BPMN
         {
             await bpmnService.DeployProcessDefinition();
 
-            await bpmnService.CleanupProcessInstances();
+            //await bpmnService.CleanupProcessInstances();
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

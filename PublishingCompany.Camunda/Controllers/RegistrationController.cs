@@ -7,11 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PublishingCompany.Camunda.BPMN;
 using PublishingCompany.Camunda.CQRS.EmailConfirmationWriter;
+using PublishingCompany.Camunda.CQRS.GetBetaForm;
 using PublishingCompany.Camunda.CQRS.GetDormData;
+using PublishingCompany.Camunda.CQRS.GetFormDataGeneric;
+using PublishingCompany.Camunda.CQRS.RegisterBetaReader;
+using PublishingCompany.Camunda.CQRS.RegisterReader;
 using PublishingCompany.Camunda.CQRS.RegisterUser;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.DTO;
 using PublishingCompany.Camunda.Helpers.ClientTokenGenerator;
+using PublishingCompany.Camunda.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -29,11 +34,13 @@ namespace PublishingCompany.Camunda.Controllers
         private readonly BpmnService _bpmnService;
         private readonly IGenerateClientJwt _clientJwt;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
         public RegistrationController(
             IMediator mediator, UserManager<User> userManager, 
             SignInManager<User> signInManager, IConfiguration config, 
-            BpmnService bpmnService, IGenerateClientJwt clientJwt, IMapper mapper)
+            BpmnService bpmnService, IGenerateClientJwt clientJwt, 
+            IMapper mapper, IUnitOfWork unitOfWork)
         {
             _mediator = mediator;
             _userManager = userManager;
@@ -42,6 +49,7 @@ namespace PublishingCompany.Camunda.Controllers
             _bpmnService = bpmnService;
             _clientJwt = clientJwt;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         //treba ubaciti u cqrs ako se hoce ispostovati do kraja sve ali samo zbog jedne linije..
@@ -49,13 +57,16 @@ namespace PublishingCompany.Camunda.Controllers
         public async Task<ActionResult<string>> StartWriterProcess()
         {
             var cometee = await _userManager.GetUsersInRoleAsync("Cometee");
-            return Ok(await _bpmnService.StartWriterRegistrationProcess(cometee));
+            var genres = _unitOfWork.Genres.GetAll();
+            return Ok(await _bpmnService.StartWriterRegistrationProcess(cometee,genres));
         }
 
         [HttpGet("StartReaderProcess")]
         public async Task<ActionResult<string>> StartReaderProccess()
         {
-            return Ok(await _bpmnService.StartReaderRegistrationProcess());
+            var genres = _unitOfWork.Genres.GetAll();
+            var beta = _unitOfWork.BetaGenres.GetAll();
+            return Ok(await _bpmnService.StartReaderRegistrationProcess(genres,beta));
         }
 
         [HttpGet("GetFormData")]
@@ -65,8 +76,36 @@ namespace PublishingCompany.Camunda.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetGenresFormData")]
+        public async Task<ActionResult> GetBetaGenresForm([FromQuery]GetBetaFormRequest request)
+        {
+            var response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpGet("GetGenericFormData")]
+        public async Task<ActionResult> GetGenericForm([FromQuery] GetFormDataGenericRequest request)
+        {
+            var response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
         [HttpPost("RegisterUser")]
         public async Task<ActionResult> RegisterUser(RegisterUserRequest request)
+        {
+            var response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpPost("RegisterReader")]
+        public async Task<ActionResult> RegisterReadrUser(RegisterReaderRequest request)
+        {
+            var response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpPost("RegisterBetaReader")]
+        public async Task<ActionResult> RegisterBetaReader(RegisterBetaReaderRequest request)
         {
             var response = await _mediator.Send(request);
             return Ok(response);
@@ -114,8 +153,10 @@ namespace PublishingCompany.Camunda.Controllers
         [HttpGet("dummy")]
         public ActionResult Dummy()
         {
-            var userDto = new UserDto() { Name = "ijasdoiajsdoi" };
-            var user = _mapper.Map<User>(userDto);
+            var task =  _bpmnService.GetUserTaskResource("RegistrationTask").Result;
+            var gg = task.GetRenderedForm().Result;
+            var ga = task.GetForm().Result;
+            var gf = task.GetFormVariables().Result;
             return Ok("RADI autorizacija i autentifikacija");
         }
     }

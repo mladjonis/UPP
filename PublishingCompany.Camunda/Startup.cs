@@ -105,11 +105,11 @@ namespace PublishingCompany.Camunda
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DbInitializer dbInitializer)
         {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-            {
-                var context = serviceScope.ServiceProvider.GetRequiredService<CamundaContext>();
-                context.Database.Migrate();
-            }
+            //using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            //{
+            //    var context = serviceScope.ServiceProvider.GetRequiredService<CamundaContext>();
+            //    context.Database.Migrate();
+            //}
 
             if (env.IsDevelopment())
             {
@@ -120,7 +120,7 @@ namespace PublishingCompany.Camunda
             app.UseHttpsRedirection();
             app.UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = new PhysicalFileProvider(
+                FileProvider = new PhysicalFileProvider( 
                      Path.Combine(env.ContentRootPath, "docs")),
                 RequestPath = "/docs"
             });

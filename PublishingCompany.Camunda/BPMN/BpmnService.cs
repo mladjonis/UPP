@@ -45,6 +45,8 @@ namespace PublishingCompany.Camunda.BPMN
         //private Regex beginningRegex = new Regex(@"<bpmn:userTask.+>$[\s\W\w.]+</bpmn:userTask>", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
         private Regex beginningRegex = new Regex("<bpmn:userTask.*?</bpmn:userTask>", RegexOptions.Singleline);
         private Regex formFieldManipulation = new Regex(@"<camunda:formField.+>$[\s\S]*?</camunda:formField>", RegexOptions.Multiline);
+        private Regex extensionInputElements = new Regex(@"<camunda:inputParameter.+>[0-9]+</camunda:inputParameter>", RegexOptions.Multiline);
+        private Regex getNumber = new Regex(@"\d+");
         private Regex formFieldWithoutValidation = new Regex(@"<camunda:formField.+/>$", RegexOptions.Multiline);
         private Regex formFieldInfo = new Regex(@"<camunda:formField.+>$", RegexOptions.Multiline);
         private Regex formValidation = new Regex(@"<camunda:validation>[\s\S]*?</camunda:validation>", RegexOptions.Multiline);
@@ -53,6 +55,18 @@ namespace PublishingCompany.Camunda.BPMN
         private Regex userTask = new Regex("<bpmn:userTask.+>$", RegexOptions.Multiline);
         #endregion
 
+
+        /* za dobijanje input parametra u user task formi
+<bpmn:userTask id="Task_Upload_PDFs" name="Upload PDFs" camunda:assignee="${username}">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="docCount">2</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_0a1olag</bpmn:incoming>
+        <bpmn:outgoing>Flow_03g0sp7</bpmn:outgoing>
+      </bpmn:userTask>
+         */
         public async Task<FormFieldsDto> GetFormData(string processDefinitionKey, string taskKeyDefinitionOrTaskName)
         {
             var stringXml = await camunda.ProcessDefinitions.ByKey(processDefinitionKey).GetXml();
@@ -64,13 +78,19 @@ namespace PublishingCompany.Camunda.BPMN
             }
 
             var task = taskList.Find(z=>z.Contains($"id=\"{taskKeyDefinitionOrTaskName}\"")|| z.Contains($"name=\"{taskKeyDefinitionOrTaskName}\""));
+            if (string.IsNullOrEmpty(task))
+            {
+                return null;
+            }
             //ili krace
             //var taskKrace = taskList.Find(x=>x.Contains(taskKeyDefinitionOrTaskName));
             var userTaskInfo = userTask.Matches(task);
             var formFields = formFieldManipulation.Matches(task);
             var formFieldsWithoutValdiations = formFieldWithoutValidation.Matches(task);
+            //ima bug neki
+            var inputParams = extensionInputElements.Matches(task);
             var processInstance = await GetProcessInstancesInfo(this.processInstanceId);
-            var form = new FormFieldsDto(){ProcessDefinitionKey= processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = processInstance.FirstOrDefault().Id};
+            var form = new FormFieldsDto(){ProcessDefinitionKey= processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = this.processInstanceId};
             //var form = new FormFieldsDto() { ProcessDefinitionKey = processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = "f3eea732-52a4-11eb-9f77-e4f89c5bfdff" };
             var taskInfo = stringManipulation.Matches(userTaskInfo[0].Value);
             foreach (Match ut in taskInfo)
@@ -87,6 +107,15 @@ namespace PublishingCompany.Camunda.BPMN
                 {
                     form.FormKey = ut.Groups[1].Value.Replace("\"", "");
                 }
+            }
+            //za potrebe ako forma ima neka ogranicenja recimo za brojeve dokumenata u ovom slucaju vrati samo taj broj jer za kasnije se mogu drugacije uraditi
+            if (inputParams.Count > 0)
+            {
+                //var camundaFF = new CamundaFormField();
+                //camundaFF.DefaultValue = getNumber.Match(inputParams[0].Value).Value;
+                //form.CamundaFormFields.Add(camundaFF);
+                form.FormKey = getNumber.Match(inputParams[0].Value).Value;
+                return form;
             }
 
             //var formInfo = stringManipulation.Matches(userTaskInfo[0].Value);
@@ -124,7 +153,17 @@ namespace PublishingCompany.Camunda.BPMN
                     }
                     else if (fd.Value.Contains("defaultValue="))
                     {
-                        camundaFrom1.DefaultValue = fd.Groups[1].Value.Replace("\"", "");
+                        var t = GetUserTaskResource(taskKeyDefinitionOrTaskName).Result;
+                        if (t != null)
+                        {
+                            camundaFrom1.DefaultValue = t.GetFormVariables().Result.Where(x => x.Key.Equals("ga")).FirstOrDefault().Value.Value.ToString();
+                        }
+                        else
+                        {
+                            var t2 = GetUserTaskResourceById(taskKeyDefinitionOrTaskName).Result;
+                            var gg = t2.GetFormVariables().Result;
+                            camundaFrom1.DefaultValue = t2.GetFormVariables().Result.Where(x => x.Key.Equals("ga")).FirstOrDefault().Value.Value.ToString();
+                        }
                     }
                 }
                 var values = formValue.Matches(formFields[i].Value);
@@ -155,6 +194,22 @@ namespace PublishingCompany.Camunda.BPMN
                         camundaFrom1.Values.Add(formVal);
                     }
                 }
+                //if (camundaFrom1.Type.Equals("enum"))
+                //{
+                //    var processInstanceResource = GetProcessInstanceResource(this.processInstanceId);
+                //    var registrationValues = await processInstanceResource.Variables.Get("genres");
+                //    var jArrayValue = (Newtonsoft.Json.Linq.JArray)registrationValues.Value;
+                //    var submittedData = jArrayValue.ToObject<List<Genre>>();
+                //    foreach (var genre in submittedData)
+                //    {
+                //        FormFieldValues formVal = new FormFieldValues();
+                //        formVal.Id = genre.Name;
+                //        formVal.Name = genre.Name;
+                //        formVal.Label = "Genres";
+                //        camundaFrom1.Values.Add(formVal);
+                //    }
+                    
+                //}
                 var val = formValidation.Matches(formFields[i].Value);
                 if (val.Count > 0)
                 {
@@ -203,10 +258,20 @@ namespace PublishingCompany.Camunda.BPMN
                     }
                     else if (fd.Value.Contains("defaultValue="))
                     {
-                        camundaFrom1.DefaultValue = fd.Groups[1].Value.Replace("\"", "");
+                        var t = GetUserTaskResource(taskKeyDefinitionOrTaskName).Result;
+                        if (t != null)
+                        {
+                            camundaFrom1.DefaultValue = t.GetFormVariables().Result.Where(x => x.Key.Equals("ga")).FirstOrDefault().Value.Value.ToString();
+                        }
+                        else
+                        {
+                            var t2 = GetUserTaskResourceById(taskKeyDefinitionOrTaskName).Result;
+                            var gg = t2.GetFormVariables().Result;
+                            camundaFrom1.DefaultValue = t2.GetFormVariables().Result.Where(x => x.Key.Equals("ga")).FirstOrDefault().Value.Value.ToString();
+                        }
                     }
                 }
-                var values = formValue.Matches(formFields[i].Value);
+                var values = formValue.Matches(formFieldsWithoutValdiations[i].Value);
                 if (values.Count > 0 && camundaFrom1.Type.Equals("enum"))
                 {
                     for (int p = 0; p < values.Count; p++)
@@ -234,7 +299,24 @@ namespace PublishingCompany.Camunda.BPMN
                         camundaFrom1.Values.Add(formVal);
                     }
                 }
-                var val = formValidation.Matches(formFields[i].Value);
+                //if (camundaFrom1.Type.Equals("enum"))
+                //{
+                //    var processInstanceResource = GetProcessInstanceResource(this.processInstanceId);
+                //    var registrationValues = await processInstanceResource.Variables.Get("genres");
+                //    var jArrayValue = (Newtonsoft.Json.Linq.JArray)registrationValues.Value;
+                //    var submittedData = jArrayValue.ToObject<List<Genre>>();
+                //    foreach (var genre in submittedData)
+                //    {
+                //        FormFieldValues formVal = new FormFieldValues();
+                //        formVal.Id = genre.Id.ToString();
+                //        formVal.Name = genre.Name;
+                //        formVal.Label = "Genres";
+                //        camundaFrom1.Values.Add(formVal);
+                //    }
+
+                //}
+
+                var val = formValidation.Matches(formFieldsWithoutValdiations[i].Value);
                 if (val.Count > 0)
                 {
                     var valDetails = stringManipulation.Matches(val[0].Value);
@@ -460,9 +542,18 @@ namespace PublishingCompany.Camunda.BPMN
         public async Task<TaskResource> GetUserTaskResource(string taskKey)
         {
             var task = await camunda.UserTasks.Query(new TaskQuery() { TaskDefinitionKey = taskKey, ProcessInstanceId = this.processInstanceId }).List();
+            if (task.Count == 0)
+                return null;
             return camunda.UserTasks[task.FirstOrDefault().Id];
         }
 
+        public async Task<TaskResource> GetUserTaskResourceById(string taskId)
+        {
+            var task = await camunda.UserTasks.Query(new TaskQuery() { Name = taskId, ProcessInstanceId = this.processInstanceId }).List();
+            if (task.Count == 0)
+                return null;
+            return camunda.UserTasks[task.FirstOrDefault().Id];
+        }
         /// <summary>
         /// vraca samo tip inputa i ime
         /// </summary>
@@ -498,12 +589,12 @@ namespace PublishingCompany.Camunda.BPMN
             return user.FirstOrDefault();
         }
 
-        public async Task CleanupProcessInstances()
+        public async Task CleanupProcessInstances(string processDefinitionKey)
         {
             var instances = await camunda.ProcessInstances
                 .Query(new ProcessInstanceQuery
                 {
-                    ProcessDefinitionKey = "PROCESS_DEFINITION_KEY" //u nasem slucaju Process_Writer_Registration
+                    ProcessDefinitionKey = processDefinitionKey
                 })
                 .List();
 
@@ -520,28 +611,43 @@ namespace PublishingCompany.Camunda.BPMN
         /// 
         /// </summary>
         /// <returns> Process definition Id</returns>
-        public async Task<string> StartWriterRegistrationProcess(IList<User> cometee)
+        public async Task<string> StartWriterRegistrationProcess(IList<User> cometee, IEnumerable<Genre> genres)
         {
             var processInstance = new StartProcessInstance().SetVariable("validation", false)
                 .SetVariable("cometees", cometee)
+                .SetVariable("genres", genres)
                 .SetVariable("documentCountRequired", false);
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();
-            processDefinitionId = "Process_Writer_Registration";
+            processDefinitionId = "Process_Writer_Registration3";
             var processStartResult = await
                 camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;
         }
 
-        public async Task<string> StartReaderRegistrationProcess()
+        public async Task<string> StartReaderRegistrationProcess(IEnumerable<Genre> genres,IEnumerable<BetaGenre> betaGenres)
         {
-            var processInstance = new StartProcessInstance().SetVariable("validation", false);
+            var processInstance = new StartProcessInstance()
+                .SetVariable("validation", false)
+                .SetVariable("genres", genres)
+                .SetVariable("beta_g", betaGenres);
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();
-            processDefinitionId = "Process_Reader_Registration";
+            processDefinitionId = "Process_Reader_Registration4";
+
             var processStartResult = await
                 camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;
+            //var pr = string.Empty;
+            //    try
+            //    {
+            //        var processStartResult = await
+            //camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
+            //    }catch(Exception e)
+            //    {
+
+            //    }
+            //    return pr;
         }
 
         public async Task<UserTaskInfo> ClaimTask(string taskId, string user)
