@@ -15,6 +15,7 @@ namespace PublishingCompany.Camunda.DbConfig
 
         public DbSet<User> User { get; set; }
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<BetaGenre> BetaGenres { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -35,5 +36,5 @@ namespace PublishingCompany.Camunda.DbConfig
                     .IsRequired();
             });
         }
-        }
+    }
 }

@@ -37,29 +37,27 @@ namespace PublishingCompany.Camunda.Handlers
         }
         public async override Task<IExecutionResult> Process(ExternalTask externalTask)
         {
-            if (externalTask.Retries == null)
+            if (externalTask.Retries == null || externalTask.Retries == 0)
             {
                 externalTask.Retries = 3;
             }
 
             externalTask.Retries -= 1;
+            //
             try
             {
                 //deserializacija vrednosti koje su potrebne za serijalizaciju na workeru
                 var processInstanceResource = _bpmnService.GetProcessInstanceResource(externalTask.ProcessInstanceId);
-                var readerRegistrationGenresValues = await processInstanceResource.Variables.Get("readerRegistrationValuesGenres");
                 var readerRegistrationValues = await processInstanceResource.Variables.Get("readerRegistrationValues");
-                var betaReader = await processInstanceResource.Variables.Get("betaReader");
+                var readerBetaValues = await processInstanceResource.Variables.Get("readerRegistrationValuesGenres");
                 var jArrayValue = (Newtonsoft.Json.Linq.JArray)readerRegistrationValues.Value;
-                var jGenresArrayValue = (Newtonsoft.Json.Linq.JArray)readerRegistrationGenresValues.Value;
                 var submittedData = jArrayValue.ToObject<List<FormSubmitDto>>();
-                var submittedGenres = jGenresArrayValue.ToObject<List<FormSubmitDto>>();
-                //postoji ovde caka sada kada se bude mapiralo na usera kastuj podatke kako?
                 //mapiraj submitovane podatke na usera
                 var userDto = _dtoMapper.MapFormDataToUserDto(submittedData);
-                var userDto2 = _dtoMapper.MapFormDataToUserDto(submittedGenres);
                 var user = _mapper.Map<User>(userDto);
-                var user2 = _mapper.Map<User>(userDto2);
+                var jArrayValue2 = (Newtonsoft.Json.Linq.JArray)readerRegistrationValues.Value;
+                var submittedGenres = jArrayValue.ToObject<List<FormSubmitDto>>();
+                var betaGenres = _dtoMapper.MapFormDataToUserDto(submittedGenres);
 
                 var userProfile = _mapper.Map<UserProfileInfo>(user);
 
@@ -92,7 +90,7 @@ namespace PublishingCompany.Camunda.Handlers
                     };
                 }
 
-                if (betaReader.GetValue<bool>()) 
+                if (bool.Parse(userDto.BetaReader)) 
                 {
                     var userRole = await _userManager.AddToRoleAsync(user, "BetaReader");
                     if (!userRole.Succeeded)
@@ -105,7 +103,7 @@ namespace PublishingCompany.Camunda.Handlers
                             }
                         };
                     }
-                    user.BetaGenres = userDto2.BetaReaderGenres;
+                    user.BetaGenres = betaGenres.BetaReaderGenres;
                     _unitOfWork.Users.Update(user);
                     _unitOfWork.Complete();
                 }
@@ -126,7 +124,6 @@ namespace PublishingCompany.Camunda.Handlers
 
                 await _bpmnService.CreateUser(userProfile, userDto.Password);
                 await _bpmnService.SetProcessVariableByProcessInstanceId("validation", externalTask.ProcessInstanceId, true);
-                // postavi varijablu za email da bi se u sledecem procesu moglo pristupiti i da bi se znalo generisati token na osnovu cega
                 await _bpmnService.SetProcessVariableByProcessInstanceId("userEmail", externalTask.ProcessInstanceId, user.Email);
 
             }

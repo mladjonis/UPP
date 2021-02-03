@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Camunda.Api.Client.User;
 using PublishingCompany.Camunda.CQRS.CometeeFormData;
+using PublishingCompany.Camunda.CQRS.GetBetaForm;
 using PublishingCompany.Camunda.CQRS.GetDormData;
+using PublishingCompany.Camunda.CQRS.GetFormDataGeneric;
 using PublishingCompany.Camunda.CQRS.RegisterUser;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.DTO;
@@ -19,6 +21,8 @@ namespace PublishingCompany.Camunda
             //add mapings
             CreateMap<FormFieldsDto, GetFormDataResponse>();
             CreateMap<FormFieldsDto, CometeeFormDataResponse>();
+            CreateMap<FormFieldsDto, GetBetaFormResponse>();
+            CreateMap<FormFieldsDto, GetFormDataGenericResponse>();
             CreateMap<UserDto, User>()
                 .ForMember(destination => destination.UserName, src => src.MapFrom(s => s.Username));
             CreateMap<User, UserProfileInfo>()

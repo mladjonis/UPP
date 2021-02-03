@@ -10,6 +10,7 @@ namespace PublishingCompany.Camunda.Repositories
     {
         IUserRepository Users { get; set; }
         IGenreRepository Genres { get; set; }
+        IBetaRepository BetaGenres { get; set; }
         int Complete();
         Task<int> CompleteAsync();
     }

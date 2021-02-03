@@ -37,6 +37,11 @@ namespace PublishingCompany.Camunda.Handlers
                     var link = "http://localhost:3000/upload-more";
                     await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"<a href=\"{link}\">Go to</a>", true);
                 }
+                else if (externalTask.Variables["message"].Value.ToString().Contains("approved"))
+                {
+                    var link = "http://localhost:3000/payment";
+                    await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"Follow link for payment <a href=\"{link}\">Go to</a>", true);
+                }
                 else
                 {
                     await _emailService.SendAsync(userEmail, $"Notify user", $"{externalTask.Variables["message"].Value}");
