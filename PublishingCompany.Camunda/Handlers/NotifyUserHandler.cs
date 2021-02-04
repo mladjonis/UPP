@@ -42,6 +42,22 @@ namespace PublishingCompany.Camunda.Handlers
                     var link = "http://localhost:3000/payment";
                     await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"Follow link for payment <a href=\"{link}\">Go to</a>", true);
                 }
+                else if (externalTask.Variables["message"].Value.ToString().Contains("payment"))
+                {
+                    var link = "http://localhost:3000/";
+                    var paymentStatus = processInstanceResource.Variables.Get("paymentStatus").Result.GetValue<string>();
+                    await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value} + {paymentStatus}", $"Home page <a href=\"{link}\">Go to home</a>", true);
+                }
+                else if (externalTask.Variables["message"].Value.ToString().Contains("editor"))
+                {
+                    var link = "http://localhost:3000/books";
+                    await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"Books page <a href=\"{link}\">Go to books</a>", true);
+                }
+                else if (externalTask.Variables["message"].Value.ToString().Contains("Send all writing"))
+                {
+                    var link = "http://localhost:3000/send-writing";
+                    await _emailService.SendAsync(userEmail, $"{externalTask.Variables["message"].Value}", $"Send writing page <a href=\"{link}\">Go to send writing</a>", true);
+                }
                 else
                 {
                     await _emailService.SendAsync(userEmail, $"Notify user", $"{externalTask.Variables["message"].Value}");

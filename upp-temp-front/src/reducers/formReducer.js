@@ -10,6 +10,7 @@ import {
   SUBMIT_COMETEE_FORM_DATA,
   GET_COMETEE_USERS,
   FETCH_BETA_FORM_DATA,
+  FETCH_PAYMENT,
 } from "../actions/types";
 
 const initState = {
@@ -22,6 +23,7 @@ const initState = {
   auth: null,
   cometeeUsers: null,
   beta: null,
+  paymentStatus: null,
 };
 
 const formReducer = (state = initState, action) => {
@@ -44,6 +46,8 @@ const formReducer = (state = initState, action) => {
       return { ...state, auth: action.payload };
     case FETCH_BETA_FORM_DATA:
       return { ...state, beta: action.payload };
+    case FETCH_PAYMENT:
+      return { ...state, paymentStatus: action.payload };
     case DOC_UPLOAD:
       return state;
     default:

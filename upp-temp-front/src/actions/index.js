@@ -12,11 +12,13 @@ import {
   DOC_UPLOAD,
   GET_COMETEE_USERS,
   FETCH_BETA_FORM_DATA,
+  FETCH_PAYMENT,
 } from "./types";
 import { registrationApi } from "../apis/registration";
 import { genresApi } from "../apis/genres";
 import { fileApi } from "../apis/file";
 import { cometeeApi } from "../apis/cometee";
+import { paymentApi } from "../apis/payment";
 import jwtDecode from "jwt-decode";
 import { history } from "../history";
 
@@ -196,6 +198,31 @@ export const fetchBetaReadersFormData = (procId, taskNameOrId) => async (
     },
   });
   dispatch({ type: FETCH_BETA_FORM_DATA, payload: response.data });
+};
+
+export const fetchGenericFormData = (procId, taskNameOrId) => async (
+  dispatch
+) => {
+  const response = await registrationApi.get("/GetGenericFormData", {
+    params: {
+      ProcessInstanceId: procId,
+      TaskNameOrId: taskNameOrId,
+    },
+  });
+  dispatch({ type: FETCH_FORM_DATA, payload: response.data });
+};
+
+export const submitPayment = (formListData, procId, taskNameOrId) => async (
+  dispatch
+) => {
+  const response = await paymentApi.get("/PaymentRequest", {
+    params: {
+      SubmitFields: formListData,
+      ProcessInstanceId: procId,
+      TaskNameOrId: taskNameOrId,
+    },
+  });
+  dispatch({ type: FETCH_PAYMENT, payload: response.data });
 };
 
 export const dummy = () => async (dispatch) => {

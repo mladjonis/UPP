@@ -1,6 +1,7 @@
 ﻿using Camunda.Api.Client;
 using Camunda.Api.Client.Deployment;
 using Camunda.Api.Client.ExternalTask;
+using Camunda.Api.Client.Group;
 using Camunda.Api.Client.ProcessDefinition;
 using Camunda.Api.Client.ProcessInstance;
 using Camunda.Api.Client.User;
@@ -510,6 +511,11 @@ namespace PublishingCompany.Camunda.BPMN
             await processInstanceVariables.Set(variableName, VariableValue.FromObject(value));
         }
         public async Task SetProcessVariableByProcessInstanceId(string variableName, string processInstanceId, string value)
+        {
+            var processInstanceVariables = camunda.ProcessInstances[processInstanceId].Variables;
+            await processInstanceVariables.Set(variableName, VariableValue.FromObject(value));
+        }
+        public async Task SetProcessVariableByProcessInstanceId(string variableName, string processInstanceId, long value)
         {
             var processInstanceVariables = camunda.ProcessInstances[processInstanceId].Variables;
             await processInstanceVariables.Set(variableName, VariableValue.FromObject(value));
