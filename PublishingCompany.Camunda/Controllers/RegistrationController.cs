@@ -69,6 +69,21 @@ namespace PublishingCompany.Camunda.Controllers
             return Ok(await _bpmnService.StartReaderRegistrationProcess(genres,beta));
         }
 
+        [HttpGet("StartPlagiarismProcess")]
+        public async Task<ActionResult<string>> StartPlagiarismProcess()
+        {
+            var cometees = await _userManager.GetUsersInRoleAsync("Cometee");
+            var editors = await _userManager.GetUsersInRoleAsync("Editor");
+            var username = await GetCurrentUserAsync();
+            return Ok(await _bpmnService.StartPlagiarismProcess(cometees,editors,username.UserName));
+        }
+
+        //[HttpGet("StartBookProcess")]
+        //public async Task<ActionResult<string>> StartBookProcess()
+        //{
+        //    return Ok(await _bpmnService.StartBookProcess());
+        //}
+
         [HttpGet("GetFormData")]
         public async Task<ActionResult> Get([FromQuery]GetFormDataRequest request)
         {
@@ -147,6 +162,8 @@ namespace PublishingCompany.Camunda.Controllers
         {
             await _signInManager.SignOutAsync();
         }
+
+        private async Task<User> GetCurrentUserAsync() => await _userManager.GetUserAsync(HttpContext.User);
 
 
         //[Authorize(Roles ="Writer")]

@@ -644,16 +644,36 @@ namespace PublishingCompany.Camunda.BPMN
             var processStartResult = await
                 camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
             return processStartResult.Id;
-            //var pr = string.Empty;
-            //    try
-            //    {
-            //        var processStartResult = await
-            //camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
-            //    }catch(Exception e)
-            //    {
+        }
 
-            //    }
-            //    return pr;
+        public async Task<string> StartPlagiarismProcess(IEnumerable<User> cometees, IEnumerable<User> editors, string username)
+        {
+            var processInstance = new StartProcessInstance()
+                .SetVariable("cometees", cometees)
+                .SetVariable("editors", editors)
+                .SetVariable("loggedUsername", username);
+            //ako bude trebao businessKey
+            //processParams.BusinessKey = user.Id.ToString();
+            processDefinitionId = "Process_Plagiarism";
+
+            var processStartResult = await
+                camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
+            return processStartResult.Id;
+        }
+
+        public async Task<string> StartBookPublishingProcess(IEnumerable<Genre> genres, IEnumerable<BetaGenre> betaGenres, string username)
+        {
+            var processInstance = new StartProcessInstance()
+                .SetVariable("validation", false)
+                .SetVariable("genres", genres)
+                .SetVariable("beta_g", betaGenres);
+            //ako bude trebao businessKey
+            //processParams.BusinessKey = user.Id.ToString();
+            processDefinitionId = "Process_Book";
+
+            var processStartResult = await
+                camunda.ProcessDefinitions.ByKey(processDefinitionId).StartProcessInstance(processInstance);
+            return processStartResult.Id;
         }
 
         public async Task<UserTaskInfo> ClaimTask(string taskId, string user)
