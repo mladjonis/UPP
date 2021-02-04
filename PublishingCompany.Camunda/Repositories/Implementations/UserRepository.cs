@@ -20,5 +20,15 @@ namespace PublishingCompany.Camunda.Repositories.Implementations
         {
             return _context.Users.Where(x => x.Email.Equals(email)).FirstOrDefault();
         }
+
+        public User GetUserByName(string name)
+        {
+            return _context.Users.Where(x => x.FullName().ToLower().Equals(name)).FirstOrDefault();
+        }
+
+        public User GetUserByUsername(string username)
+        {
+            return _context.Users.Where(x => x.NormalizedUserName.Equals(username.ToUpper())).FirstOrDefault();
+        }
     }
 }

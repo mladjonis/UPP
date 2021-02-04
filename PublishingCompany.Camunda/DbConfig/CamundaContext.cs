@@ -16,6 +16,9 @@ namespace PublishingCompany.Camunda.DbConfig
         public DbSet<User> User { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BetaGenre> BetaGenres { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<CometeeComment> CometeeComents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

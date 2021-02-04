@@ -22,5 +22,9 @@ namespace PublishingCompany.Camunda.Domain
         public List<Genre> Genres { get; set; }
         public List<BetaGenre> BetaGenres { get; set; } = new List<BetaGenre>();
         public long Amount { get; set; }
+        public string FullName()
+        {
+            return $"{Name} {Lastname}";
+        }
     }
 }

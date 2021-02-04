@@ -15,13 +15,18 @@ namespace PublishingCompany.Camunda.Repositories
 
         public IGenreRepository Genres { get; set; }
         public IBetaRepository BetaGenres { get; set; }
+        public IBookRepository Books { get; set; }
+        public ICommentRepository Comments { get; set; }
 
-        public UnitOfWork(CamundaContext context, IUserRepository userRepository, IGenreRepository genreRepository, IBetaRepository betaRepository)
+        public UnitOfWork(CamundaContext context, IUserRepository userRepository, 
+            IGenreRepository genreRepository, IBetaRepository betaRepository,
+            IBookRepository bookRepository, ICommentRepository commentRepository)
         {
             _context = context;
             this.Users = userRepository;
             this.Genres = genreRepository;
             this.BetaGenres = betaRepository;
+            this.Books = bookRepository;
         }
 
         public int Complete()

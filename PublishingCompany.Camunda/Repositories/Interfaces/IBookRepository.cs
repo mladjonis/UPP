@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Repositories.Interfaces
 {
-    public interface IUserRepository : IRepository<User, Guid>
+    public interface IBookRepository : IRepository<Book, Guid>
     {
-        User GetUserByEmail(string email);
-        User GetUserByName(string name);
-        User GetUserByUsername(string username);
+        Book GetByName(string name);
     }
 }
