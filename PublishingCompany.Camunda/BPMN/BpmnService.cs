@@ -47,6 +47,7 @@ namespace PublishingCompany.Camunda.BPMN
         private Regex beginningRegex = new Regex("<bpmn:userTask.*?</bpmn:userTask>", RegexOptions.Singleline);
         private Regex formFieldManipulation = new Regex(@"<camunda:formField.+>$[\s\S]*?</camunda:formField>", RegexOptions.Multiline);
         private Regex extensionInputElements = new Regex(@"<camunda:inputParameter.+>[0-9]+</camunda:inputParameter>", RegexOptions.Multiline);
+        private Regex property = new Regex(@"<camunda:property.+/>$", RegexOptions.Multiline);
         private Regex getNumber = new Regex(@"\d+");
         private Regex formFieldWithoutValidation = new Regex(@"<camunda:formField.+/>$", RegexOptions.Multiline);
         private Regex formFieldInfo = new Regex(@"<camunda:formField.+>$", RegexOptions.Multiline);
@@ -88,8 +89,9 @@ namespace PublishingCompany.Camunda.BPMN
             var userTaskInfo = userTask.Matches(task);
             var formFields = formFieldManipulation.Matches(task);
             var formFieldsWithoutValdiations = formFieldWithoutValidation.Matches(task);
-            //ima bug neki
             var inputParams = extensionInputElements.Matches(task);
+            var propertyParams = property.Matches(task);;
+            var propertyInfo = stringManipulation.Matches(propertyParams[0].Value);
             var processInstance = await GetProcessInstancesInfo(this.processInstanceId);
             var form = new FormFieldsDto(){ProcessDefinitionKey= processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = this.processInstanceId};
             //var form = new FormFieldsDto() { ProcessDefinitionKey = processDefinitionKey, ProcessDefinitionId = processDefinitionId, ProcessInstanceId = "f3eea732-52a4-11eb-9f77-e4f89c5bfdff" };
@@ -117,6 +119,10 @@ namespace PublishingCompany.Camunda.BPMN
                 //form.CamundaFormFields.Add(camundaFF);
                 form.FormKey = getNumber.Match(inputParams[0].Value).Value;
                 return form;
+            }
+            if(propertyInfo.Count > 0)
+            {
+                form.FormKey = getNumber.Match(propertyInfo[1].Value).Value;
             }
 
             //var formInfo = stringManipulation.Matches(userTaskInfo[0].Value);

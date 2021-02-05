@@ -13,6 +13,7 @@ using PublishingCompany.Camunda.CQRS.GetFormDataGeneric;
 using PublishingCompany.Camunda.CQRS.RegisterBetaReader;
 using PublishingCompany.Camunda.CQRS.RegisterReader;
 using PublishingCompany.Camunda.CQRS.RegisterUser;
+using PublishingCompany.Camunda.CQRS.SubmitFormDataGeneric;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.DTO;
 using PublishingCompany.Camunda.Helpers.ClientTokenGenerator;
@@ -100,6 +101,13 @@ namespace PublishingCompany.Camunda.Controllers
 
         [HttpGet("GetGenericFormData")]
         public async Task<ActionResult> GetGenericForm([FromQuery] GetFormDataGenericRequest request)
+        {
+            var response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpPost("SubmitGenericForm")]
+        public async Task<ActionResult> SubmitGenericForm(SubmitFormDataGenericRequest request)
         {
             var response = await _mediator.Send(request);
             return Ok(response);

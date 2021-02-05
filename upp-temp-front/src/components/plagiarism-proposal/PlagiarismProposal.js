@@ -7,7 +7,7 @@ import {
 } from "../../actions";
 import { history } from "../../history";
 
-class FormFields extends React.Component {
+class PlagiarismProposal extends React.Component {
   async componentDidMount() {
     await this.props.startPlgiarismProcess();
     await this.props.fetchGenericFormData(this.props.processInstanceId);
@@ -325,4 +325,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(FormFields);
+export default connect(mapStateToProps, mapDispatchToProps)(PlagiarismProposal);

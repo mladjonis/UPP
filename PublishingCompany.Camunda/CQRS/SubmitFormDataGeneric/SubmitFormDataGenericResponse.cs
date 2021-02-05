@@ -7,5 +7,7 @@ namespace PublishingCompany.Camunda.CQRS.SubmitFormDataGeneric
 {
     public class SubmitFormDataGenericResponse
     {
+        public string ProcessInstanceId { get; set; }
+        public string Status { get; set; }
     }
 }

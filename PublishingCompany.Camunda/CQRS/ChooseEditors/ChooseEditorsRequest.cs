@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PublishingCompany.Camunda.CQRS.SubmitFormDataGeneric
+namespace PublishingCompany.Camunda.CQRS.ChooseEditors
 {
-    public class SubmitFormDataGenericRequest : IRequest<SubmitFormDataGenericResponse>
+    public class ChooseEditorsRequest : IRequest<ChooseEditorsResponse>
     {
         public string TaskId { get; set; }
         public string ProcessInstanceId { get; set; }

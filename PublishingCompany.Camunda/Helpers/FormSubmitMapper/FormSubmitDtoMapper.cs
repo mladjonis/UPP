@@ -154,5 +154,24 @@ namespace PublishingCompany.Camunda.Helpers.FormSubmitMapper
             }
             return userDto;
         }
+
+        public UserEditorDto MapFromDataToUserEditorDto(List<FormSubmitDto> submitDtos)
+        {
+            var users = _unitOfWork.Users.GetAll();
+            UserEditorDto user = new UserEditorDto();
+            foreach(var data in submitDtos)
+            {
+                if (data.FieldId.Equals("plagiarism_editors"))
+                {
+                    var split = data.FieldValue.ToString().Split(',');
+                    for (int i = 0; i < split.Length; i++)
+                    {
+                        user.Editors.Add(users.Where(g => g.FullName().ToLower().Equals(split[i])).FirstOrDefault());
+                    }
+                }
+            }
+
+            return user;
+        }
     }
 }

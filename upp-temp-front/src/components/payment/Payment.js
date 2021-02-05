@@ -1,6 +1,4 @@
 import React from "react";
-
-import React from "react";
 import { connect } from "react-redux";
 import { fetchGenericFormData, submitPayment } from "../../actions";
 import { history } from "../../history";

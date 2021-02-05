@@ -36,7 +36,7 @@ namespace PublishingCompany.Camunda.Handlers
                 var book = _unitOfWork.Books.GetByName(bookName);
                 if(writer == null || book == null)
                 {
-                    _bpmnService.SetProcessVariableByProcessInstanceId("book_exist", externalTask.ProcessInstanceId, false);
+                    await _bpmnService.SetProcessVariableByProcessInstanceId("book_exist", externalTask.ProcessInstanceId, false);
                     return new CompleteResult()
                     {
                         Variables = new Dictionary<string, Variable>
@@ -45,7 +45,7 @@ namespace PublishingCompany.Camunda.Handlers
                         }
                     };
                 }
-                _bpmnService.SetProcessVariableByProcessInstanceId("book_exist", externalTask.ProcessInstanceId, true);
+                await _bpmnService.SetProcessVariableByProcessInstanceId("book_exist", externalTask.ProcessInstanceId, true);
             }
             catch (Exception e)
             {

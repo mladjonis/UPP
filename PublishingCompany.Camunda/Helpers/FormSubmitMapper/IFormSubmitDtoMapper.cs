@@ -15,5 +15,6 @@ namespace PublishingCompany.Camunda.Helpers.FormSubmitMapper
         CompleteTask SetFormValues(Dictionary<string, string> dtoKvp);
         CompleteTask GetFormValues(List<FormSubmitDto> submitDtos);
         UserDto MapFormDataToUserDto(List<FormSubmitDto> submitDtos);
+        UserEditorDto MapFromDataToUserEditorDto(List<FormSubmitDto> submitDtos);
     }
 }

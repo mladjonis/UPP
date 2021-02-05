@@ -9,6 +9,9 @@ import FileUpload from "./components/file-upload/FileUpload";
 import DecisionsDetails from "./components/cometee/DecisionsDetails";
 import Payment from "./components/payment/Payment";
 import FileUploadMore from "./components/file-upload/FileUploadMore";
+import ChooseEditors from "./components/choose-editors/ChooseEditors";
+import PlagiarismProposal from "./components/plagiarism-proposal/PlagiarismProposal";
+import PlagiarismMessage from "./components/plagiarism-proposal/PlagiarismMessage";
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
         <Route path="/upload-more" component={FileUploadMore} />
         <Route path="/cometee" component={DecisionsDetails} />
         <Route path="/payment" component={Payment} />
+        <Route path="/proposal" component={PlagiarismProposal} />
+        <Route path="/proposal-message" component={PlagiarismMessage} />
+        <Route path="/choose-editors" component={ChooseEditors} />
       </Switch>
     </React.Fragment>
   );
