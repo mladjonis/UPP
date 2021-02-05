@@ -76,14 +76,30 @@ namespace PublishingCompany.Camunda.Controllers
             var cometees = await _userManager.GetUsersInRoleAsync("Cometee");
             var editors = await _userManager.GetUsersInRoleAsync("Editor");
             var username = await GetCurrentUserAsync();
-            return Ok(await _bpmnService.StartPlagiarismProcess(cometees,editors,username.UserName));
+            if (await _userManager.IsInRoleAsync(username, "Writer"))
+            {
+                return Ok(await _bpmnService.StartPlagiarismProcess(cometees, editors, username.UserName));
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
-        //[HttpGet("StartBookProcess")]
-        //public async Task<ActionResult<string>> StartBookProcess()
-        //{
-        //    return Ok(await _bpmnService.StartBookProcess());
-        //}
+        [HttpGet("StartBookProcess")]
+        public async Task<ActionResult<string>> StartBookProcess()
+        {
+            var genres = _unitOfWork.Genres.GetAll();
+            var beta = _unitOfWork.BetaGenres.GetAll();
+            var username = await GetCurrentUserAsync();
+            if (await _userManager.IsInRoleAsync(username, "Writer"))
+            {
+                return Ok(await _bpmnService.StartBookPublishingProcess(genres, beta, username.UserName));
+            }else
+            {
+                return BadRequest();
+            }
+        }
 
         [HttpGet("GetFormData")]
         public async Task<ActionResult> Get([FromQuery]GetFormDataRequest request)

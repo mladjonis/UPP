@@ -1,9 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import { fetchGenericFormData, submitGenericForm } from "../../actions";
+import { fetchGenericFormData, submitEditorsForm } from "../../actions";
 import { history } from "../../history";
 
 class ChooseEditors extends React.Component {
+  state = {
+    editorRequirement: false,
+  };
+
   async componentDidMount() {
     await this.props.fetchGenericFormData(
       this.props.processInstanceId,
@@ -13,10 +17,31 @@ class ChooseEditors extends React.Component {
 
   populateFormSendingList = async (formListData) => {
     let sendingList = [];
+    let editorsList = [];
+    //Editors
     formListData.forEach((value, key) => {
-      sendingList.push({ FieldId: key, FieldValue: value });
+      if (key === "Editors") {
+        editorsList.push(value);
+      } else {
+        sendingList.push({ FieldId: key, FieldValue: value });
+      }
     });
-    return [...sendingList];
+    if (editorsList.length > 0) {
+      let l2 = [
+        { FieldId: "plagiarism_editors", FieldValue: genresList.join(",") },
+      ];
+      await this.setStateAsync({ editorRequirement: true });
+      return [...sendingList, ...l2];
+    } else {
+      await this.setStateAsync({ editorRequirement: false });
+      return [...sendingList];
+    }
+  };
+
+  setStateAsync = (state) => {
+    return new Promise((resolve) => {
+      this.setState(state, resolve);
+    });
   };
 
   onFormSubmit = async (event) => {
@@ -26,8 +51,8 @@ class ChooseEditors extends React.Component {
     const listData = await this.populateFormSendingList(data);
     //format je recimo input-value pa onda input-name
     console.log(this.state);
-
-    await this.props.submitGenericForm(
+    if (this.state.editorRequirement === false) return;
+    await this.props.submitEditorsForm(
       listData,
       this.props.formData.taskId,
       this.props.formData.processInstanceId,
@@ -291,7 +316,15 @@ class ChooseEditors extends React.Component {
                       </select>
                     </div>
                   ) : null}
-                  {/*proveri da li ima greske  */}
+                  {
+                    /*proveri da li ima greske  */
+                    this.state.editorRequirement ? (
+                      <div>
+                        Morate da odaberete {this.props.formData.formKey}{" "}
+                        editora
+                      </div>
+                    ) : null
+                  }
                 </React.Fragment>
               );
             })}
@@ -317,8 +350,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchGenericFormData: (processInstanceId, taskIdOrName) =>
       dispatch(fetchGenericFormData(processInstanceId, taskIdOrName)),
-    submitGenericForm: (formListData, taskId, procInstanceId) =>
-      dispatch(submitGenericForm(formListData, taskId, procInstanceId)),
+    submitEditorsForm: (formListData, taskId, procInstanceId) =>
+      dispatch(submitEditorsForm(formListData, taskId, procInstanceId)),
   };
 };
 

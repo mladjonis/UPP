@@ -31,7 +31,9 @@ const FileUpload = (props) => {
       </div>
       <input type="file" onChange={saveFiles} multiple />
       <input type="button" value="Upload" onClick={onClick} />
-      {!docCount ? <div>Atleast 2 document is required</div> : null}
+      {!docCount ? (
+        <div>Atleast {props.formData.formKey} document is required</div>
+      ) : null}
     </React.Fragment>
   );
 };

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Controllers
 {
-    //[Authorize(Roles ="Cometee")]
+    [Authorize(Roles ="Cometee")]
     [Route("api/[controller]")]
     [ApiController]
     public class CometeeController : ControllerBase

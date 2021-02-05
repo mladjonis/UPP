@@ -12,7 +12,7 @@ namespace PublishingCompany.Camunda.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize(Roles ="Writer")]
     public class PaymentController : ControllerBase
     {
         private readonly IMediator _mediator;

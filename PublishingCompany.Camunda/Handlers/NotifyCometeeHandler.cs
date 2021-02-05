@@ -2,6 +2,7 @@
 using Camunda.Worker;
 using NETCore.MailKit.Core;
 using PublishingCompany.Camunda.BPMN;
+using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.DTO;
 using PublishingCompany.Camunda.Helpers.FormSubmitMapper;
 using System;
@@ -11,15 +12,15 @@ using System.Threading.Tasks;
 
 namespace PublishingCompany.Camunda.Handlers
 {
-    [HandlerTopics("Topic_NotifyEditorsHandler", LockDuration = 10_000)]
-    public class NotifyEditorsHandler : ExternalTaskHandler
+    [HandlerTopics("Topic_NotifyCometeeHandler", LockDuration = 10_000)]
+    public class NotifyCometeeHandler : ExternalTaskHandler
     {
         private readonly BpmnService _bpmnService;
         private readonly IFormSubmitDtoMapper _dtoMapper;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
 
-        public NotifyEditorsHandler(BpmnService bpmnService, IFormSubmitDtoMapper dtoMapper, IMapper mapper, IEmailService emailService)
+        public NotifyCometeeHandler(BpmnService bpmnService, IFormSubmitDtoMapper dtoMapper, IMapper mapper, IEmailService emailService)
         {
             _bpmnService = bpmnService;
             _dtoMapper = dtoMapper;
@@ -32,14 +33,12 @@ namespace PublishingCompany.Camunda.Handlers
             try
             {
                 var processInstanceResource = _bpmnService.GetProcessInstanceResource(externalTask.ProcessInstanceId);
-                var registrationValues = await processInstanceResource.Variables.Get("chosenEditors");
-                var jArrayValue = (Newtonsoft.Json.Linq.JArray)registrationValues.Value;
-                var submittedData = jArrayValue.ToObject<List<FormSubmitDto>>();
-                var editorDto = _dtoMapper.MapFromDataToUserEditorDto(submittedData);
-                var link = "http://localhost:3000/choose-editors";
-                foreach (var editor in editorDto.Editors)
+                var cometeeValues = await processInstanceResource.Variables.Get("cometees");
+                var cometees = cometeeValues.GetValue<List<User>>();
+                var link = "http://localhost:3000/decision-plagiarism";
+                foreach (var cometee in cometees)
                 {
-                    _emailService.Send(editor.Email, "Izabrani ste za editora knjige koju je potrebno proveriti da li je plagijarizam", $"Vise informacija na linku <a href=\"{link}\">Go</a>", true);
+                    _emailService.Send(cometee.Email, "Izabrani ste za clanove komesije za odluku za knjige koju je potrebno proveriti da li je plagijarizam", $"Vise informacija na linku <a href=\"{link}\">Go</a>", true);
                 }
             }
             catch (Exception e)

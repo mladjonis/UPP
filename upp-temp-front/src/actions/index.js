@@ -102,6 +102,19 @@ export const submitGenericForm = (
   dispatch({ type: SUBMIT_FORM_DATA, payload: response.data });
 };
 
+export const submitEditorsForm = (
+  formListData,
+  taskId,
+  procInstanceId
+) => async (dispatch) => {
+  const response = await registrationApi.post("/ChooseEditors", {
+    SubmitFields: formListData,
+    TaskId: taskId,
+    ProcessInstanceId: procInstanceId,
+  });
+  dispatch({ type: SUBMIT_FORM_DATA, payload: response.data });
+};
+
 export const getGenres = () => async (dispatch) => {
   const response = await genresApi.get("/GetAll");
 

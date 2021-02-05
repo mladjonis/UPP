@@ -12,6 +12,7 @@ import FileUploadMore from "./components/file-upload/FileUploadMore";
 import ChooseEditors from "./components/choose-editors/ChooseEditors";
 import PlagiarismProposal from "./components/plagiarism-proposal/PlagiarismProposal";
 import PlagiarismMessage from "./components/plagiarism-proposal/PlagiarismMessage";
+import DecisionPlagiarism from "./components/cometee/DecisionPlagiarism";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/proposal" component={PlagiarismProposal} />
         <Route path="/proposal-message" component={PlagiarismMessage} />
         <Route path="/choose-editors" component={ChooseEditors} />
+        <Route path="/decision-plagiarism" component={DecisionPlagiarism} />
       </Switch>
     </React.Fragment>
   );

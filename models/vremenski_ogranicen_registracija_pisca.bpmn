@@ -126,7 +126,7 @@ execution.setVariable("counter",counter);</camunda:script>
         <bpmn:serviceTask id="Activity_12k3nav" name="Payment status / Notify user" camunda:type="external" camunda:topic="Topic_NotifyUserHandler">
           <bpmn:extensionElements>
             <camunda:inputOutput>
-              <camunda:inputParameter name="message">Your payment was</camunda:inputParameter>
+              <camunda:inputParameter name="message">Your payment was </camunda:inputParameter>
             </camunda:inputOutput>
           </bpmn:extensionElements>
           <bpmn:incoming>Flow_1s83j7b</bpmn:incoming>
@@ -401,7 +401,7 @@ if(counterOdluka1 !=0 &amp;&amp; listSize/counterOdluka1 == 1){
         <bpmn:incoming>Flow_0nrrym8</bpmn:incoming>
         <bpmn:outgoing>Flow_0vi8z1y</bpmn:outgoing>
       </bpmn:serviceTask>
-      <bpmn:sequenceFlow id="Flow_1x5w5s5" name="User rejected" sourceRef="Gateway_061eng9" targetRef="Activity_1wkbgnl">
+      <bpmn:sequenceFlow id="Flow_1x5w5s5" name="User rejected" sourceRef="Gateway_061eng9" targetRef="Task_User_rejection">
         <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable("odluka3")==true}</bpmn:conditionExpression>
       </bpmn:sequenceFlow>
       <bpmn:endEvent id="Event_0a6l8ad">
@@ -414,8 +414,13 @@ if(counterOdluka1 !=0 &amp;&amp; listSize/counterOdluka1 == 1){
             <camunda:inputParameter name="message">Rejected</camunda:inputParameter>
           </camunda:inputOutput>
         </bpmn:extensionElements>
-        <bpmn:incoming>Flow_1x5w5s5</bpmn:incoming>
+        <bpmn:incoming>Flow_1xp86h2</bpmn:incoming>
         <bpmn:outgoing>Flow_1f2n5s2</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="Flow_1xp86h2" sourceRef="Task_User_rejection" targetRef="Activity_1wkbgnl" />
+      <bpmn:serviceTask id="Task_User_rejection" name="User rejection" camunda:type="external" camunda:topic="Topic_UserRejectionHandler">
+        <bpmn:incoming>Flow_1x5w5s5</bpmn:incoming>
+        <bpmn:outgoing>Flow_1xp86h2</bpmn:outgoing>
       </bpmn:serviceTask>
     </bpmn:subProcess>
     <bpmn:boundaryEvent id="Event_0lku8jr" attachedToRef="Activity_1o11j0g">
@@ -455,14 +460,17 @@ if(counterOdluka1 !=0 &amp;&amp; listSize/counterOdluka1 == 1){
         <dc:Bounds x="310" y="70" width="1550" height="630" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1f2n5s2_di" bpmnElement="Flow_1f2n5s2">
-        <di:waypoint x="390" y="240" />
-        <di:waypoint x="390" y="208" />
+        <di:waypoint x="385" y="133" />
+        <di:waypoint x="380" y="102" />
+        <di:waypoint x="402" y="102" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1x5w5s5_di" bpmnElement="Flow_1x5w5s5">
-        <di:waypoint x="544" y="371" />
-        <di:waypoint x="440" y="310" />
+        <di:waypoint x="535" y="380" />
+        <di:waypoint x="503" y="380" />
+        <di:waypoint x="503" y="360" />
+        <di:waypoint x="470" y="360" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="418" y="335" width="66" height="14" />
+          <dc:Bounds x="381" y="249" width="66" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0vi8z1y_di" bpmnElement="Flow_0vi8z1y">
@@ -498,15 +506,15 @@ if(counterOdluka1 !=0 &amp;&amp; listSize/counterOdluka1 == 1){
         <di:waypoint x="660" y="500" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1jue65y_di" bpmnElement="Flow_1jue65y">
-        <di:waypoint x="380" y="410" />
-        <di:waypoint x="380" y="378" />
+        <di:waypoint x="380" y="490" />
+        <di:waypoint x="380" y="522" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0vuy12m_di" bpmnElement="Flow_0vuy12m">
         <di:waypoint x="560" y="405" />
         <di:waypoint x="560" y="420" />
         <di:waypoint x="430" y="420" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="455" y="386" width="49" height="27" />
+          <dc:Bounds x="455" y="426" width="49" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1i2i5uz_di" bpmnElement="Flow_1i2i5uz">
@@ -621,6 +629,12 @@ if(counterOdluka1 !=0 &amp;&amp; listSize/counterOdluka1 == 1){
         <di:waypoint x="1026" y="170" />
         <di:waypoint x="1085" y="170" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xp86h2_di" bpmnElement="Flow_1xp86h2">
+        <di:waypoint x="420" y="310" />
+        <di:waypoint x="420" y="262" />
+        <di:waypoint x="390" y="262" />
+        <di:waypoint x="390" y="213" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_1hmbpwk_di" bpmnElement="Event_1hmbpwk">
         <dc:Bounds x="990" y="152" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -642,8 +656,17 @@ if(counterOdluka1 !=0 &amp;&amp; listSize/counterOdluka1 == 1){
       <bpmndi:BPMNShape id="Event_0c40un2_di" bpmnElement="Event_0c40un2">
         <dc:Bounds x="932" y="122" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0w1acle_di" bpmnElement="Activity_1wkbgnl">
+        <dc:Bounds x="340" y="133" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0a6l8ad_di" bpmnElement="Event_0a6l8ad">
+        <dc:Bounds x="402" y="84" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0gwxlcm_di" bpmnElement="Event_0gwxlcm">
-        <dc:Bounds x="362" y="342" width="36" height="36" />
+        <dc:Bounds x="362" y="522" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_19fjagn_di" bpmnElement="Task_User_rejection">
+        <dc:Bounds x="370" y="310" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0zo86zi_di" bpmnElement="Activity_0zo86zi" isExpanded="true">
         <dc:Bounds x="820" y="460" width="590" height="200" />
@@ -732,12 +755,6 @@ if(counterOdluka1 !=0 &amp;&amp; listSize/counterOdluka1 == 1){
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0p0h6sg_di" bpmnElement="Activity_16o0ax4">
         <dc:Bounds x="1660" y="420" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0a6l8ad_di" bpmnElement="Event_0a6l8ad">
-        <dc:Bounds x="372" y="172" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0w1acle_di" bpmnElement="Activity_1wkbgnl">
-        <dc:Bounds x="340" y="240" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0o200ip_di" bpmnElement="Event_15oo3ec">
         <dc:Bounds x="1552" y="402" width="36" height="36" />

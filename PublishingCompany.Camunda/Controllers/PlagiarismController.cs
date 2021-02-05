@@ -1,8 +1,10 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PublishingCompany.Camunda.BPMN;
+using PublishingCompany.Camunda.CQRS.ChooseEditors;
 using PublishingCompany.Camunda.CQRS.PlagiarismProposal;
 using PublishingCompany.Camunda.Domain;
 using PublishingCompany.Camunda.Repositories;
@@ -15,6 +17,7 @@ namespace PublishingCompany.Camunda.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PlagiarismController : ControllerBase
     {
         private readonly BpmnService _bpmnService;
@@ -32,6 +35,13 @@ namespace PublishingCompany.Camunda.Controllers
 
         [HttpPost("SubmitProposal")]
         public async Task<ActionResult> SubmitCometeeForm(PlagiarismProposalRequest request)
+        {
+            var response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpPost("ChooseEditors")]
+        public async Task<ActionResult> ChooseEditors(ChooseEditorsRequest request)
         {
             var response = await _mediator.Send(request);
             return Ok(response);

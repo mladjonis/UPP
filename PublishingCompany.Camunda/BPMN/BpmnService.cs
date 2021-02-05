@@ -506,6 +506,13 @@ namespace PublishingCompany.Camunda.BPMN
             var processInstanceVariables = camunda.ProcessInstances[processInstanceId].Variables;
             await processInstanceVariables.Set(variableName, VariableValue.FromObject(values));
         }
+
+        public async Task SetProcessVariableByProcessInstanceId(string variableName, string processInstanceId, List<Book> values)
+        {
+            var processInstanceVariables = camunda.ProcessInstances[processInstanceId].Variables;
+            await processInstanceVariables.Set(variableName, VariableValue.FromObject(values));
+        }
+
         public async Task SetProcessVariableByProcessInstanceId(string variableName, string processInstanceId, bool validation)
         {
             var processInstanceVariables = camunda.ProcessInstances[processInstanceId].Variables;
@@ -672,6 +679,7 @@ namespace PublishingCompany.Camunda.BPMN
             var processInstance = new StartProcessInstance()
                 .SetVariable("validation", false)
                 .SetVariable("genres", genres)
+                .SetVariable("loggedUsername", username)
                 .SetVariable("beta_g", betaGenres);
             //ako bude trebao businessKey
             //processParams.BusinessKey = user.Id.ToString();
